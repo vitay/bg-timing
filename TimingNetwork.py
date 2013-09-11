@@ -290,14 +290,14 @@ class TimingNetwork(Network):
                              
         # CE -> VTA, exc
         self.connect(all2all(pre="CE", post="VTA", connection_type="exc",
-                             value=1.8, delay=0) )
+                             value=2.0, delay=0) )
                              
         # NAcc -> VTA, mod
         proj = self.connect(all2all(pre="NAcc", post="VTA", connection_type="mod",
                                     value=0.0, var_value=0.0, delay=0), 
                             learning_rule = Oja )
         proj.set_learning_parameters({
-            'tau': 1000.0,
+            'tau': 2000.0,
             'K_alpha': 0.0,
             'tau_alpha': 1.0
         })
@@ -371,7 +371,7 @@ class TimingNetwork(Network):
             'DA_threshold_positive': 0.6,
             'DA_threshold_negative': 0.4,
             'DA_K_positive': 3.0,
-            'DA_K_negative': 10.0  
+            'DA_K_negative': 1.0  
         })     
         
         # Competition in BLA, inh 
@@ -496,19 +496,26 @@ def extinction_trial(net, CS=None):
     # Reset for 1s
     for neur in net.population('VIS'):
         neur.baseline = 0.0
+    for neur in net.population('GUS'):
+        neur.baseline = 0.0  
     net.execute(1000)
     # Select the CS randomly if not given
     if not CS:
         CS = np.random.randint(2) + 1
     VIS = [0.0, 0.0]
+    GUS = [1.0, 0.0, 0.0, 0.0]
     VIS[CS-1] = 1.0
-    print 'Extinction: ', VIS
+    GUS[CS] = 1.0
+    print 'Conditioning: ', VIS, GUS
     # Present CS1 for 3s, CS2 for 4s
     net.population('VIS').set_variables({'baseline': VIS})
     net.execute(1000*(CS+2))
-    # Present the US for 1s
+    # DO NOT Present the US for 1s
+    #net.population('GUS').set_variables({'baseline': GUS}) 
     net.execute(1000)
     # Reset for 1s
     for neur in net.population('VIS'):
         neur.baseline = 0.0
+    for neur in net.population('GUS'):
+        neur.baseline = 0.0  
     net.execute(1000)
