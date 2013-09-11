@@ -297,7 +297,7 @@ class TimingNetwork(Network):
                                     value=0.0, var_value=0.0, delay=0), 
                             learning_rule = Oja )
         proj.set_learning_parameters({
-            'tau': 2000.0,
+            'tau': 1000.0,
             'K_alpha': 0.0,
             'tau_alpha': 1.0
         })
@@ -349,7 +349,7 @@ class TimingNetwork(Network):
                                     value=0.5, var_value= 0.1, delay=0),
                             learning_rule=DA_Covariance )
         proj.set_learning_parameters({
-            'tau': 10.0,
+            'tau': 100.0,
             'min_value': -0.2,
             'K_alpha': 100.0,
             'tau_alpha': 10.0,

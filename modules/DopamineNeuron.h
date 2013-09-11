@@ -35,7 +35,9 @@ class DopamineNeuron : public annarNeuron
             
             mean_input_+=1.0/tau_decrease_* (input_-mean_input_);
             
-            mp_+= 1.0 /tau_ * (-mp_ + positive(input_-mean_input_) * positive(1.0 - inhibition_) - dip_ + baseline_ + noise_*(2.0*rand_num-1.0));
+            mp_+= 1.0 /tau_ * (-mp_ + positive(input_-mean_input_) * positive(1.0 - inhibition_) 
+                                    - dip_ 
+                                    + baseline_ + noise_*(2.0*rand_num-1.0));
             
             rate_ = positive(mp_ - threshold_min_);
             if(rate_ > threshold_max_)
