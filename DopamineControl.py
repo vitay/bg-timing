@@ -16,7 +16,7 @@ for trial in range(10):
     valuation_trial(net, 2) # US2
     
 # Record VTA before conditioning
-net.record(['VTA']) 
+net.record(['VTA', 'NAcc']) 
 conditioning_trial(net, 1) # CS1, US1
 before_CS1 = net.get_recordings()
 conditioning_trial(net, 2) # CS2, US2
@@ -29,7 +29,7 @@ for trial in range(3):
     conditioning_trial(net, 2) # CS2, US2
 
 # Record VTA during conditioning
-net.record(['VTA']) 
+net.record(['VTA', 'NAcc']) 
 conditioning_trial(net, 1) # CS1, US1
 during_CS1 = net.get_recordings()
 conditioning_trial(net, 2) # CS2, US2
@@ -42,7 +42,7 @@ for trial in range(4):
     conditioning_trial(net, 2) # CS2, US2 
 
 # Record VTA after conditioning
-net.record(['VTA']) 
+net.record(['VTA', 'NAcc']) 
 conditioning_trial(net, 1) # CS1, US1
 after_CS1 = net.get_recordings()
 conditioning_trial(net, 2) # CS2, US2
@@ -61,33 +61,41 @@ ax.set_title('CS1 - US1')
 ax.set_ylabel('Before conditioning')
 ax.set_ylim((0., 1.1))
 ax.plot(np.array(before_CS1['VTA']['rate'][0]))
+ax.plot(np.max(np.array(before_CS1['NAcc']['rate']), axis=0))
 ax = plt.subplot(422)
 ax.set_title('CS2 - US2')
 ax.set_ylim((0., 1.1))
 ax.plot(np.array(before_CS2['VTA']['rate'][0]))
+ax.plot(np.max(np.array(before_CS2['NAcc']['rate']), axis=0))
 ax = plt.subplot(423)
 ax.set_ylabel('During conditioning')
 ax.set_ylim((0., 1.1))
 ax.plot(np.array(during_CS1['VTA']['rate'][0]))
+ax.plot(np.max(np.array(during_CS1['NAcc']['rate']), axis=0))
 ax = plt.subplot(424)
 ax.set_ylim((0., 1.1))
 ax.plot(np.array(during_CS2['VTA']['rate'][0]))
+ax.plot(np.max(np.array(during_CS2['NAcc']['rate']), axis=0))
 ax = plt.subplot(425)
 ax.set_ylabel('After conditioning')
 ax.set_ylim((0., 1.1))
 ax.plot(np.array(after_CS1['VTA']['rate'][0]))
+ax.plot(np.max(np.array(after_CS1['NAcc']['rate']), axis=0))
 ax = plt.subplot(426)
 ax.set_ylim((0., 1.1))
 ax.plot(np.array(after_CS2['VTA']['rate'][0]))
+ax.plot(np.max(np.array(after_CS2['NAcc']['rate']), axis=0))
 ax = plt.subplot(427)
 ax.set_xlabel('Time (ms)')
 ax.set_ylabel('Omission of reward')
 ax.set_ylim((0., 1.1))
 ax.plot(np.array(omit_CS1['VTA']['rate'][0]))
+ax.plot(np.max(np.array(omit_CS1['NAcc']['rate']), axis=0))
 ax = plt.subplot(428)
 ax.set_xlabel('Time (ms)')
 ax.set_ylim((0., 1.1))
 ax.plot(np.array(omit_CS2['VTA']['rate'][0]))
+ax.plot(np.max(np.array(omit_CS2['NAcc']['rate']), axis=0))
 
 plt.show()
 

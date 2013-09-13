@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Control of dopaminergic firing during conditioning.
 """
@@ -55,8 +54,8 @@ class TimingNetwork(Network):
         self.nb_oscillators = 30
         self.nb_nacc = 6
         # Frequencies of the oscillators
-        self.min_freq=0.5
-        self.max_freq=2.0
+        self.min_freq=2.0
+        self.max_freq=6.0
 
     def build(self):
 
@@ -286,18 +285,18 @@ class TimingNetwork(Network):
        
         # LH_ON -> VTA, exc
         self.connect(all2all(pre="LH_ON", post="VTA", connection_type="exc",
-                             value=1.0, delay=0) )
+                             value=1.5, delay=0) )
                              
         # CE -> VTA, exc
         self.connect(all2all(pre="CE", post="VTA", connection_type="exc",
-                             value=2.0, delay=0) )
+                             value=1.5, delay=0) )
                              
         # NAcc -> VTA, mod
         proj = self.connect(all2all(pre="NAcc", post="VTA", connection_type="mod",
                                     value=0.0, var_value=0.0, delay=0), 
                             learning_rule = Oja )
         proj.set_learning_parameters({
-            'tau': 2000.0,
+            'tau': 300.0,
             'K_alpha': 0.0,
             'tau_alpha': 1.0
         })
@@ -349,7 +348,7 @@ class TimingNetwork(Network):
                                     value=0.5, var_value= 0.1, delay=0),
                             learning_rule=DA_Covariance )
         proj.set_learning_parameters({
-            'tau': 100.0,
+            'tau': 10.0,
             'min_value': -0.2,
             'K_alpha': 100.0,
             'tau_alpha': 10.0,
@@ -426,7 +425,7 @@ class TimingNetwork(Network):
                                     value=0.1, var_value=0.03, delay=0),
                             learning_rule=GABATonic)
         proj.set_learning_parameters({ 
-            'tau': 500.0,
+            'tau': 50.0,
             'min_value': 0.0,
             'max_value': 1.0
         })
@@ -478,9 +477,9 @@ def conditioning_trial(net, CS=None):
     VIS[CS-1] = 1.0
     GUS[CS] = 1.0
     print 'Conditioning: ', VIS, GUS
-    # Present CS1 for 3s, CS2 for 4s
+    # Present CS1 for 2s, CS2 for 3s
     net.population('VIS').set_variables({'baseline': VIS})
-    net.execute(1000*(CS+2))
+    net.execute(1000*(CS+1))
     # Present the US for 1s
     net.population('GUS').set_variables({'baseline': GUS}) 
     net.execute(1000)
@@ -507,9 +506,9 @@ def extinction_trial(net, CS=None):
     VIS[CS-1] = 1.0
     GUS[CS] = 1.0
     print 'Conditioning: ', VIS, GUS
-    # Present CS1 for 3s, CS2 for 4s
+    # Present CS1 for 2s, CS2 for 3s
     net.population('VIS').set_variables({'baseline': VIS})
-    net.execute(1000*(CS+2))
+    net.execute(1000*(CS+1))
     # DO NOT Present the US for 1s
     #net.population('GUS').set_variables({'baseline': GUS}) 
     net.execute(1000)

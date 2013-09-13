@@ -41,10 +41,11 @@ class GatedNeuron : public annarNeuron
             adapted_rate_ += 1.0/tau_adaptation_rate_ * (rate_ - adapted_rate_);
             adapted_drive_ += 1.0/tau_adaptation_drive_ * (adapted_rate_*drive_ - adapted_drive_);
             
-            mp_+= 1.0 /tau_ * (-mp_ + positive(input_ - adapted_input_)*positive(drive_-adapted_drive_) 
-                                    - adapted_rate_* inhib_ 
-                                    + positive(drive_-adapted_drive_) 
-                                    + baseline_ + noise_*(2.0*rand_num-1.0));
+            mp_+= 1.0 /tau_ * 
+                (-mp_ + (positive(input_ - adapted_input_) * positive(drive_-adapted_drive_) 
+                        + positive(drive_-adapted_drive_)  ) * (1.0 + fb_)
+                    - adapted_rate_* inhib_ 
+                    + baseline_ + noise_*(2.0*rand_num-1.0));
             
             rate_=positive(mp_-threshold_);
 
