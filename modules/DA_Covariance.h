@@ -54,7 +54,7 @@ class DA_Covariance : public annarLearningRule
 
             FLOAT weight = synapse->getValue();
             FLOAT pre_rate= synapse->preRate();
-            FLOAT mean_pre = synapse->getPre()->getPopulation()->getMean();
+            FLOAT mean_pre = 2.0* synapse->getPre()->getPopulation()->getMean();
 
             FLOAT delta = 0.0;
             if((post_rate>mean_post)&&(pre_rate>mean_pre)) { 

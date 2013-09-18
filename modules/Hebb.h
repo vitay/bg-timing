@@ -1,13 +1,13 @@
-#ifndef GABA_TONIC_H
-#define GABA_TONIC_H
+#ifndef HEBB_H
+#define HEBB_H
 
 #include "ANNarchy.h"
 
-class GABATonic : public annarLearningRule
+class Hebb : public annarLearningRule
 {
     public:
     
-        GABATonic():  annarLearningRule(){
+        Hebb():  annarLearningRule(){
         
             tau_=1000.0;
             min_value_=0.0;
@@ -23,7 +23,7 @@ class GABATonic : public annarLearningRule
             FLOAT weight=synapse->getValue();
             FLOAT pre_rate= synapse->preRate();
 
-            FLOAT delta= positive(post_baseline - post_rate )* post_rate* pre_rate ;
+            FLOAT delta=  post_rate* pre_rate ;
 
             weight += dt_/tau_ * delta;
             if(weight < min_value_)

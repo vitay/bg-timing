@@ -10,6 +10,7 @@ compiler.neurons = ['LinearNeuron',
                     'DiffNeuron', 
                     'GatedNeuron', 
                     'PhasicNeuron', 
+                    'ModulatedPhasicNeuron', 
                     'OscillatorNeuron', 
                     'StriatalNeuron', 
                     'TonicNeuron', 
@@ -17,9 +18,10 @@ compiler.neurons = ['LinearNeuron',
 compiler.learning_rules = ['Oja',
                            'DA_Covariance',
                            'AntiHebb',
-                           'GABATonic']
+                           'Hebb']
 compiler.precision = 'double'
 compiler.openMP = False
+#compiler.clean()
 compiler.build()
 
 from ANNarchy.core import *
@@ -106,36 +108,6 @@ class TimingNetwork(Network):
             'threshold': 0.0 
         })
 
-        #####################
-        # Dopamine cells
-        #####################
-
-        # DA neurons in VTA
-        self.add(name="VTA", width=1, 
-                 neuron=DopamineNeuron)
-        self.population("VTA").set_parameters({ 
-            'tau': 30.0, 
-            'tau_decrease': 30.0, 
-            'noise': 0.1, 
-            'threshold_min': 0.0, 
-            'threshold_max': 1.1 
-        })
-        self.population("VTA").set_variables({
-            'baseline': 0.5 
-        })        
-
-
-        # GABergic cells in VTA
-        self.add(name="RMTg", width=1, 
-                 neuron=DiffNeuron)
-        self.population("RMTg").set_parameters({
-            'tau': 10.0, 
-            'noise': 0.1, 
-            'threshold': 0.4 
-        })
-        self.population("RMTg").set_variables({
-            'baseline': 0.0 
-        })
         
         #######################
         # Lateral hypothalamus
@@ -175,7 +147,7 @@ class TimingNetwork(Network):
                 
         # BLA   
         self.add(name="BLA", width=self.nb_bla, height=self.nb_bla, 
-                 neuron=PhasicNeuron)
+                 neuron=ModulatedPhasicNeuron)
         self.population("BLA").set_parameters({
             'tau': 10.0,
             'noise': 0.1,
@@ -234,14 +206,45 @@ class TimingNetwork(Network):
             
         # Ventral Pallidum
         self.add(name="VP", width=1,
-                 neuron=TonicNeuron)
+                 neuron=LinearNeuron)
         self.population("VP").set_parameters({
             'tau': 10.0,
             'noise': 0.0
         })
         self.population("VP").set_variables({
-            'baseline': 1.0 
+            'baseline': 0.5 
         })   
+ 
+        #####################
+        # Dopamine cells
+        #####################
+
+        # DA neurons in VTA
+        self.add(name="VTA", width=1, 
+                 neuron=DopamineNeuron)
+        self.population("VTA").set_parameters({ 
+            'tau': 30.0, 
+            'tau_decrease': 30.0, 
+            'noise': 0.1, 
+            'threshold_min': 0.0, 
+            'threshold_max': 1.1 
+        })
+        self.population("VTA").set_variables({
+            'baseline': 0.5 
+        })        
+
+
+        # Rostromedial tegmental nucleus
+        self.add(name="RMTg", width=1, 
+                 neuron=TonicNeuron)
+        self.population("RMTg").set_parameters({
+            'tau': 10.0, 
+            'noise': 0.1, 
+            'threshold': 0.4 
+        })
+        self.population("RMTg").set_variables({
+            'baseline': 0.0 
+        })
         
         # Lateral Habenula
         self.add(name="LHb", width=1, 
@@ -251,18 +254,19 @@ class TimingNetwork(Network):
             'noise': 0.1
         })
         self.population("LHb").set_variables({
-            'baseline': 1.0 
+            'baseline': 1.0
         }) 
 
         # Pedunculopontine nucleus
         self.add(name="PPTN", width=1, 
-                 neuron=ThresholdNeuron)
+                 neuron=PhasicNeuron)
         self.population("PPTN").set_parameters({
             'tau': 10.0,
-            'noise': 0.0
+            'noise': 0.0,
+            'tau_adaptation': 100.0
         })
         self.population("PPTN").set_variables({
-            'baseline': 0.1
+            'baseline': 0.0
         }) 
             
     def connect_populations(self):
@@ -274,21 +278,27 @@ class TimingNetwork(Network):
         # Visual inputs to IT
         self.connect(fixed_number_pre(pre="VIS", post="IT", connection_type="exc", 
                                       value=1.0, number=1, delay=0 ) )
-        
-        # Gustatory input to PPTN                              
-        self.connect(all2all(pre="GUS", post="PPTN", connection_type="exc", 
-                             value=0.8, delay=0))
-
         #######################
         # VTA and RMTg
         #######################
-       
-        # LH_ON -> VTA, exc
-        self.connect(all2all(pre="LH_ON", post="VTA", connection_type="exc",
-                             value=1.5, delay=0) )
+        
+        # Gustatory input to PPTN                              
+        self.connect(all2all(pre="GUS", post="PPTN", connection_type="exc", 
+                             value=1.0, delay=0))
+      
+#        # LH_ON -> VTA, exc
+#        self.connect(all2all(pre="LH_ON", post="VTA", connection_type="exc",
+#                             value=1.5, delay=0) )
                              
-        # CE -> VTA, exc
-        self.connect(all2all(pre="CE", post="VTA", connection_type="exc",
+#        # CE -> VTA, exc
+#        self.connect(all2all(pre="CE", post="VTA", connection_type="exc",
+#                             value=1.5, delay=0) )
+                             
+        # CE -> PPTN, exc
+        self.connect(all2all(pre="CE", post="PPTN", connection_type="exc",
+                             value=1.5, delay=0) )
+        # PPTN -> VTA, exc
+        self.connect(all2all(pre="PPTN", post="VTA", connection_type="exc",
                              value=1.5, delay=0) )
                              
         # NAcc -> VTA, mod
@@ -300,21 +310,25 @@ class TimingNetwork(Network):
             'K_alpha': 0.0,
             'tau_alpha': 1.0
         })
-            
+        
+        # PPTN -> VP, exc
+        self.connect(all2all(pre="PPTN", post="VP", connection_type="exc", 
+                             value=0.5, delay=0))
+        # VP -> RMTg, inh
+        self.connect(all2all(pre="VP", post="RMTg", connection_type="inh", 
+                             value=0.5, delay=0))
+        # VP -> LHb, inh
+        self.connect(all2all(pre="VP", post="LHb", connection_type="inh", 
+                             value=2.0, delay=0))
+                             
         # LHb -> RMTg, exc
         self.connect(all2all(pre="LHb", post="RMTg", connection_type="exc", 
                              value=1.0, delay=0))
-        
-        # PPTN -> RMTg, inh
-        self.connect(all2all(pre="PPTN", post="RMTg", connection_type="inh", 
-                             value=1.0, delay=0))
-        # VP -> RMTg, inh
-        self.connect(all2all(pre="VP", post="RMTg", connection_type="inh", 
-                             value=1.0, delay=0))
                              
-        # RMTg -> VTA, inh
+        # RMTg -> VTA, inh # Currently shut off!
         self.connect(all2all(pre="RMTg", post="VTA", connection_type="inh", 
-                             value=2.0, delay=0))
+                             value=0.0, delay=0))
+        
                              
         #######################
         # Lateral hypothalamus
@@ -339,12 +353,12 @@ class TimingNetwork(Network):
         # Amygdala
         #######################
         
-        # DA to VTA, dopa
+        # DA to BLA, dopa
         self.connect(all2all(pre="VTA", post="BLA", connection_type="dopa", 
                              value=1.0,  delay=0) )
                      
-        # LH_ON to BLA, exc (US)
-        proj = self.connect(all2all(pre="LH_ON", post="BLA", connection_type="exc", 
+        # LH_ON to BLA, exc (US) # TODO changed to GUS instead of LH_ON!!!
+        proj = self.connect(all2all(pre="GUS", post="BLA", connection_type="exc", 
                                     value=0.5, var_value= 0.1, delay=0),
                             learning_rule=DA_Covariance )
         proj.set_learning_parameters({
@@ -423,20 +437,13 @@ class TimingNetwork(Network):
         # Inhibitory projection from NAcc to VP
         proj = self.connect(all2all(pre="NAcc", post="VP", connection_type="inh",       
                                     value=0.1, var_value=0.03, delay=0),
-                            learning_rule=GABATonic)
+                            learning_rule=Hebb)
         proj.set_learning_parameters({ 
             'tau': 50.0,
             'min_value': 0.0,
             'max_value': 1.0
         })
         
-        # BG output on LHb
-        self.connect(all2all(pre="VP", post="LHb", connection_type="inh", 
-                             value=1.0, delay=0) )
-        
-        # BG output on PPTN
-        self.connect(all2all(pre="VP", post="PPTN", connection_type="inh", 
-                             value=1.0, delay=0))
 
 
 

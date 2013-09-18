@@ -24,19 +24,16 @@ class DopamineNeuron : public annarNeuron
 
         virtual void step(){
 
-            if(sum("exc") < 100.0)
-                input_ = sum("exc");
-            else
-                input_ = 100.0;
+            input_ = sum("exc");
             
             inhibition_ = sum("mod");
+
+            mean_input_+= dt_/tau_decrease_* (input_-mean_input_);
             
-            dip_=(input_<mean_input_+0.05? 3.0*positive(sum("inh")-0.1):0.0);
+            dip_= sum("inh");       
             
-            mean_input_+=1.0/tau_decrease_* (input_-mean_input_);
-            
-            mp_+= 1.0 /tau_ * (-mp_ + positive(input_-mean_input_) * positive(1.0 - inhibition_) 
-                                    - dip_ 
+            mp_+= dt_/tau_ * (-mp_ + positive(input_ - mean_input_) * positive(1.0 - inhibition_) 
+                                    - dip_ * positive(mean_input_ - input_ + 0.05)  
                                     + baseline_ + noise_*(2.0*rand_num-1.0));
             
             rate_ = positive(mp_ - threshold_min_);
