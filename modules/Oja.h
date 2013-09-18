@@ -26,8 +26,9 @@ class Oja : public annarLearningRule
             FLOAT pre_rate= synapse->preRate();
             
             // Regularization constraint
-            alpha_=positive(alpha_+dt_/tau_alpha_*(positive(post_rate - 1.0) - alpha_));
+            alpha_ += dt_/tau_alpha_* (positive(post_rate - 1.0) - alpha_);
 
+            // Learning rule
             weight += dt_/tau_ *(post_rate * pre_rate - K_alpha_ * alpha_ * post_rate * post_rate * weight );
             
             if(weight < 0.0)

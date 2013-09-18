@@ -153,7 +153,7 @@ class TimingNetwork(Network):
             'noise': 0.1,
             'fb_mod': 0.1,
             'fb_exc': 0.5,
-            'tau_adaptation': 10000.0 
+            'tau_adaptation': 500.0 
         })
         self.population("BLA").set_variables({
             'baseline': -0.2
@@ -283,7 +283,7 @@ class TimingNetwork(Network):
         #######################
         
         # Gustatory input to PPTN                              
-        self.connect(all2all(pre="GUS", post="PPTN", connection_type="exc", 
+        self.connect(all2all(pre="LH_ON", post="PPTN", connection_type="exc", 
                              value=1.0, delay=0))
       
 #        # LH_ON -> VTA, exc
@@ -358,7 +358,7 @@ class TimingNetwork(Network):
                              value=1.0,  delay=0) )
                      
         # LH_ON to BLA, exc (US) # TODO changed to GUS instead of LH_ON!!!
-        proj = self.connect(all2all(pre="GUS", post="BLA", connection_type="exc", 
+        proj = self.connect(all2all(pre="LH_ON", post="BLA", connection_type="exc", 
                                     value=0.5, var_value= 0.1, delay=0),
                             learning_rule=DA_Covariance )
         proj.set_learning_parameters({

@@ -8,6 +8,7 @@ from TimingNetwork import *
 net = TimingNetwork()
 net.build()
 
+recorded_areas = ['BLA', 'GUS', 'VIS', 'LH_ON', 'CE', 'VTA', 'PPTN']
 
 # Habituate the network to the gustatory inputs
 for trial in range(10):
@@ -15,7 +16,7 @@ for trial in range(10):
     valuation_trial(net, 2) # US2
     
 # Record BLA before conditioning
-net.record(['BLA']) 
+net.record(recorded_areas) 
 conditioning_trial(net, 1) # CS1, US1
 before_CS1 = net.get_recordings()
 conditioning_trial(net, 2) # CS2, US2
@@ -28,7 +29,7 @@ for trial in range(3):
     conditioning_trial(net, 2) # CS2, US2
 
 # Record BLA during conditioning
-net.record(['BLA']) 
+net.record(recorded_areas) 
 conditioning_trial(net, 1) # CS1, US1
 during_CS1 = net.get_recordings()
 conditioning_trial(net, 2) # CS2, US2
@@ -41,7 +42,7 @@ for trial in range(4):
     conditioning_trial(net, 2) # CS2, US2 
 
 # Record BLA after conditioning
-net.record(['BLA']) 
+net.record(recorded_areas) 
 conditioning_trial(net, 1) # CS1, US1
 after_CS1 = net.get_recordings()
 conditioning_trial(net, 2) # CS2, US2
@@ -53,33 +54,44 @@ omit_CS1 = net.get_recordings()
 extinction_trial(net, 2) # CS2
 omit_CS2 = net.get_recordings()
 
+# Content of a single plot
+def single_plot(data, ax):
+    ax.plot(np.array(data['PPTN']['rate'][0]), label='PPTN')
+    ax.plot(np.array(data['VTA']['rate'][0]), label='VTA')
+    ax.plot(np.max(np.array(data['BLA']['rate']), axis=0), label='BLA')
+    ax.plot(np.max(np.array(data['CE']['rate']), axis=0), label='CE')
+    ax.plot(np.max(np.array(data['LH_ON']['rate']), axis=0), label='LH_ON')
+    ax.plot(np.max(np.array(data['GUS']['rate']), axis=0), label='GUS')
+    ax.plot(np.max(np.array(data['VIS']['rate']), axis=0), label='VIS')
+    
 # Plot
 import pylab as plt
 import matplotlib.cm as cm
 ax = plt.subplot(421)
 ax.set_title('CS1 - US1')
 ax.set_ylabel('Before conditioning')
-ax.imshow(np.array(before_CS1['BLA']['rate']), aspect='auto', vmin=0.0, vmax=1.1, cmap=cm.hot)
+single_plot(before_CS1, ax)
+ax.legend()
 ax = plt.subplot(422)
 ax.set_title('CS2 - US2')
-ax.imshow(np.array(before_CS2['BLA']['rate']), aspect='auto', vmin=0.0, vmax=1.1, cmap=cm.hot)
+single_plot(before_CS2, ax)
 ax = plt.subplot(423)
 ax.set_ylabel('During conditioning')
-ax.imshow(np.array(during_CS1['BLA']['rate']), aspect='auto', vmin=0.0, vmax=1.1, cmap=cm.hot)
+single_plot(during_CS1, ax)
 ax = plt.subplot(424)
-ax.imshow(np.array(during_CS2['BLA']['rate']), aspect='auto', vmin=0.0, vmax=1.1, cmap=cm.hot)
+single_plot(during_CS2, ax)
 ax = plt.subplot(425)
 ax.set_ylabel('After conditioning')
-ax.imshow(np.array(after_CS1['BLA']['rate']), aspect='auto', vmin=0.0, vmax=1.1, cmap=cm.hot)
+single_plot(after_CS1, ax)
 ax = plt.subplot(426)
-ax.imshow(np.array(after_CS2['BLA']['rate']), aspect='auto', vmin=0.0, vmax=1.1, cmap=cm.hot)
+single_plot(after_CS2, ax)
 ax = plt.subplot(427)
 ax.set_xlabel('Time (ms)')
 ax.set_ylabel('Omission of reward')
-ax.imshow(np.array(omit_CS1['BLA']['rate']), aspect='auto', vmin=0.0, vmax=1.1, cmap=cm.hot)
+single_plot(omit_CS1, ax)
 ax = plt.subplot(428)
 ax.set_xlabel('Time (ms)')
-ax.imshow(np.array(omit_CS2['BLA']['rate']), aspect='auto', vmin=0.0, vmax=1.1, cmap=cm.hot)
+single_plot(omit_CS2, ax)
 
 plt.show()
 
