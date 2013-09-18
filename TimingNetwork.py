@@ -7,17 +7,13 @@ compiler=ANNarchy.Compiler()
 compiler.add_module_path(['./modules'])
 compiler.neurons = ['LinearNeuron', 
                     'DopamineNeuron', 
-                    'DiffNeuron', 
                     'GatedNeuron', 
                     'PhasicNeuron', 
                     'ModulatedPhasicNeuron', 
                     'OscillatorNeuron', 
                     'StriatalNeuron', 
-                    'TonicNeuron', 
-                    'ThresholdNeuron', 
                     'ShuntingExcitationNeuron']
-compiler.learning_rules = ['Oja',
-                           'DA_Covariance',
+compiler.learning_rules = ['DA_Covariance',
                            'AntiHebb',
                            'Hebb']
 compiler.precision = 'double'
@@ -227,8 +223,8 @@ class TimingNetwork(Network):
             'tau': 30.0, 
             'tau_decrease': 30.0, 
             'noise': 0.1, 
-            'threshold_min': 0.0, 
-            'threshold_max': 1.1 
+            'threshold_': 0.0, 
+            'max_rate': 1.1 
         })
         self.population("VTA").set_variables({
             'baseline': 0.5 
@@ -237,11 +233,12 @@ class TimingNetwork(Network):
 
         # Rostromedial tegmental nucleus
         self.add(name="RMTg", width=1, 
-                 neuron=TonicNeuron)
+                 neuron=LinearNeuron)
         self.population("RMTg").set_parameters({
             'tau': 10.0, 
             'noise': 0.1, 
-            'threshold': 0.5
+            'threshold': 0.5, 
+            'max_rate': 1.1
         })
         self.population("RMTg").set_variables({
             'baseline': 0.0 
@@ -249,10 +246,12 @@ class TimingNetwork(Network):
         
         # Lateral Habenula
         self.add(name="LHb", width=1, 
-                 neuron=TonicNeuron)
+                 neuron=LinearNeuron)
         self.population("LHb").set_parameters({
             'tau': 10.0,
-            'noise': 0.1
+            'noise': 0.1, 
+            'threshold': 0.0, 
+            'max_rate': 1.1
         })
         self.population("LHb").set_variables({
             'baseline': 1.0
@@ -297,11 +296,11 @@ class TimingNetwork(Network):
         # NAcc -> VTA, mod
         proj = self.connect(all2all(pre="NAcc", post="VTA", connection_type="mod",
                                     value=0.0, var_value=0.0, delay=0), 
-                            learning_rule = Oja )
+                            learning_rule = Hebb )
         proj.set_learning_parameters({
             'tau': 500.0,
-            'K_alpha': 0.0,
-            'tau_alpha': 1.0
+            'min_value': 0.0,
+            'max_value': 1.0
         })
         
         # PPTN -> VP, exc

@@ -12,8 +12,8 @@ class DopamineNeuron : public annarNeuron
 
             tau_ = 30.0;
             tau_decrease_ = 30.0;
-            threshold_min_ = 0.0;
-            threshold_max_ = 1.1;
+            threshold_ = 0.0;
+            max_rate_ = 1.1;
             
             input_ = 0.0;
             mean_input_ = 0.0;
@@ -36,16 +36,16 @@ class DopamineNeuron : public annarNeuron
                                     - dip_ //* positive(mean_input_ - input_ + 0.05)  
                                     + baseline_ + noise_*(2.0*rand_num-1.0));
             
-            rate_ = positive(mp_ - threshold_min_);
-            if(rate_ > threshold_max_)
-                rate_ = threshold_max_;
+            rate_ = positive(mp_ - threshold_);
+            if(rate_ > max_rate_)
+                rate_ = max_rate_;
 
         };
 
     protected:
 
-        @PARAMETER FLOAT threshold_min_; // min threshold for the firing rate
-        @PARAMETER FLOAT threshold_max_; // max threshold for the firing rate
+        @PARAMETER FLOAT threshold_; // threshold for the firing rate
+        @PARAMETER FLOAT max_rate_; // max firing rate
         @PARAMETER FLOAT tau_decrease_; // Time constant for the alpha function.
         @VARIABLE FLOAT input_; // Received reward
         @VARIABLE FLOAT mean_input_; // Mean received reward (for phasic activation)
