@@ -59,7 +59,7 @@ class DA_Covariance : public annarLearningRule
             FLOAT delta = 0.0;
             if((post_rate>mean_post)&&(pre_rate>mean_pre)) { 
                 // Both cells are active:  LTP with DA modulation and regularization
-                delta = dopa_mod * (post_rate - mean_post)* (pre_rate - mean_pre) - K_alpha_*alpha_* positive(post_rate - mean_post)* positive(post_rate - mean_post) * positive(weight);
+                delta = dopa_mod * (post_rate - mean_post)* (pre_rate - mean_pre) - K_alpha_*alpha_* positive(post_rate - mean_post)* positive(post_rate - mean_post) * weight;
             }
             else{
                 if((post_rate<mean_post)&&(pre_rate<mean_pre)) { 

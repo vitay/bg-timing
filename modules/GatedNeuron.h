@@ -32,20 +32,22 @@ class GatedNeuron : public annarNeuron
 
         virtual void step(){
 
-            drive_=sum("drive");
-            input_=sum("exc");
-            inhib_=sum("inh");
-            fb_=sum("mod");
+//            drive_=sum("drive");
+//            input_=sum("exc");
+//            inhib_=sum("inh");
+//            fb_=sum("mod");
+//            
+//            adapted_input_ += 1.0/tau_adaptation_input_ * (input_ - adapted_input_);
+//            adapted_rate_ += 1.0/tau_adaptation_rate_ * (rate_ - adapted_rate_);
+//            adapted_drive_ += 1.0/tau_adaptation_drive_ * (adapted_rate_*drive_ - adapted_drive_);
+//            
+//            mp_+= 1.0 /tau_ * 
+//                (-mp_ + (positive(input_ - adapted_input_) * positive(drive_-adapted_drive_) 
+//                        + positive(drive_-adapted_drive_)  ) * (1.0 + fb_)
+//                    - adapted_rate_* inhib_ 
+//                    + baseline_ + noise_*(2.0*rand_num-1.0));
             
-            adapted_input_ += 1.0/tau_adaptation_input_ * (input_ - adapted_input_);
-            adapted_rate_ += 1.0/tau_adaptation_rate_ * (rate_ - adapted_rate_);
-            adapted_drive_ += 1.0/tau_adaptation_drive_ * (adapted_rate_*drive_ - adapted_drive_);
-            
-            mp_+= 1.0 /tau_ * 
-                (-mp_ + (positive(input_ - adapted_input_) * positive(drive_-adapted_drive_) 
-                        + positive(drive_-adapted_drive_)  ) * (1.0 + fb_)
-                    - adapted_rate_* inhib_ 
-                    + baseline_ + noise_*(2.0*rand_num-1.0));
+            mp_+= 1.0 /tau_ * ( -mp_ + sum("drive") * sum("exc") );
             
             rate_=positive(mp_-threshold_);
 

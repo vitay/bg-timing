@@ -33,7 +33,7 @@ class DopamineNeuron : public annarNeuron
             dip_= sum("inh");       
             
             mp_+= dt_/tau_ * (-mp_ + positive(input_ - mean_input_) * positive(1.0 - inhibition_) 
-                                    - dip_ * positive(mean_input_ - input_ + 0.05)  
+                                    - dip_ //* positive(mean_input_ - input_ + 0.05)  
                                     + baseline_ + noise_*(2.0*rand_num-1.0));
             
             rate_ = positive(mp_ - threshold_min_);

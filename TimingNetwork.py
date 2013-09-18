@@ -14,7 +14,8 @@ compiler.neurons = ['LinearNeuron',
                     'OscillatorNeuron', 
                     'StriatalNeuron', 
                     'TonicNeuron', 
-                    'ThresholdNeuron']
+                    'ThresholdNeuron', 
+                    'ShuntingExcitationNeuron']
 compiler.learning_rules = ['Oja',
                            'DA_Covariance',
                            'AntiHebb',
@@ -194,19 +195,19 @@ class TimingNetwork(Network):
         self.population("NAcc").set_parameters({
             'tau': 10.0,
             'noise': 0.0,
-            'threshold_up': 0.0,
+            'threshold_up': 0.1,
             'threshold_down': 0.5,
             'tau_state': 200.0,
-            'threshold_exc': 1.2,
+            'threshold_exc': 1.5,
             'threshold_dopa': 0.8  
         })  
         self.population("NAcc").set_variables({
-            'baseline': -0.2 
+            'baseline': -0.3 
         })        
             
         # Ventral Pallidum
         self.add(name="VP", width=1,
-                 neuron=LinearNeuron)
+                 neuron=ShuntingExcitationNeuron)
         self.population("VP").set_parameters({
             'tau': 10.0,
             'noise': 0.0
@@ -240,7 +241,7 @@ class TimingNetwork(Network):
         self.population("RMTg").set_parameters({
             'tau': 10.0, 
             'noise': 0.1, 
-            'threshold': 0.4 
+            'threshold': 0.5
         })
         self.population("RMTg").set_variables({
             'baseline': 0.0 
@@ -263,7 +264,7 @@ class TimingNetwork(Network):
         self.population("PPTN").set_parameters({
             'tau': 10.0,
             'noise': 0.0,
-            'tau_adaptation': 100.0
+            'tau_adaptation': 200.0
         })
         self.population("PPTN").set_variables({
             'baseline': 0.0
@@ -285,28 +286,20 @@ class TimingNetwork(Network):
         # Gustatory input to PPTN                              
         self.connect(all2all(pre="LH_ON", post="PPTN", connection_type="exc", 
                              value=1.0, delay=0))
-      
-#        # LH_ON -> VTA, exc
-#        self.connect(all2all(pre="LH_ON", post="VTA", connection_type="exc",
-#                             value=1.5, delay=0) )
-                             
-#        # CE -> VTA, exc
-#        self.connect(all2all(pre="CE", post="VTA", connection_type="exc",
-#                             value=1.5, delay=0) )
                              
         # CE -> PPTN, exc
         self.connect(all2all(pre="CE", post="PPTN", connection_type="exc",
                              value=1.5, delay=0) )
         # PPTN -> VTA, exc
         self.connect(all2all(pre="PPTN", post="VTA", connection_type="exc",
-                             value=1.5, delay=0) )
+                             value=1.0, delay=0) )
                              
         # NAcc -> VTA, mod
         proj = self.connect(all2all(pre="NAcc", post="VTA", connection_type="mod",
                                     value=0.0, var_value=0.0, delay=0), 
                             learning_rule = Oja )
         proj.set_learning_parameters({
-            'tau': 300.0,
+            'tau': 500.0,
             'K_alpha': 0.0,
             'tau_alpha': 1.0
         })
@@ -319,15 +312,15 @@ class TimingNetwork(Network):
                              value=0.5, delay=0))
         # VP -> LHb, inh
         self.connect(all2all(pre="VP", post="LHb", connection_type="inh", 
-                             value=2.0, delay=0))
+                             value=3.0, delay=0))
                              
         # LHb -> RMTg, exc
         self.connect(all2all(pre="LHb", post="RMTg", connection_type="exc", 
-                             value=1.0, delay=0))
+                             value=1.5, delay=0))
                              
         # RMTg -> VTA, inh # Currently shut off!
         self.connect(all2all(pre="RMTg", post="VTA", connection_type="inh", 
-                             value=0.0, delay=0))
+                             value=1.0, delay=0))
         
                              
         #######################
@@ -357,7 +350,7 @@ class TimingNetwork(Network):
         self.connect(all2all(pre="VTA", post="BLA", connection_type="dopa", 
                              value=1.0,  delay=0) )
                      
-        # LH_ON to BLA, exc (US) # TODO changed to GUS instead of LH_ON!!!
+        # LH_ON to BLA, exc (US) 
         proj = self.connect(all2all(pre="LH_ON", post="BLA", connection_type="exc", 
                                     value=0.5, var_value= 0.1, delay=0),
                             learning_rule=DA_Covariance )
@@ -366,7 +359,7 @@ class TimingNetwork(Network):
             'min_value': -0.2,
             'K_alpha': 100.0,
             'tau_alpha': 10.0,
-            'DA_threshold_positive': 0.7,
+            'DA_threshold_positive': 0.6,
             'DA_threshold_negative': 0.4,
             'DA_K_positive': 10.0,
             'DA_K_negative': 10.0
@@ -383,7 +376,7 @@ class TimingNetwork(Network):
             'tau_alpha': 10.0,
             'DA_threshold_positive': 0.6,
             'DA_threshold_negative': 0.4,
-            'DA_K_positive': 3.0,
+            'DA_K_positive': 5.0,
             'DA_K_negative': 1.0  
         })     
         
@@ -425,21 +418,21 @@ class TimingNetwork(Network):
                      learning_rule=DA_Covariance)
         proj.set_learning_parameters({
             'tau': 20.0,
-            'min_value': -0.5,
-            'K_alpha': 5.0,
+            'min_value': -1.0,
+            'K_alpha': 10.0,
             'tau_alpha': 10.0,
-            'DA_threshold_positive': 0.75,
-            'DA_threshold_negative': 0.25,
-            'DA_K_positive': 1.0,
+            'DA_threshold_positive': 0.8,
+            'DA_threshold_negative': 0.3,
+            'DA_K_positive': 5.0,
             'DA_K_negative': 1.0
         })
 
         # Inhibitory projection from NAcc to VP
         proj = self.connect(all2all(pre="NAcc", post="VP", connection_type="inh",       
-                                    value=0.1, var_value=0.03, delay=0),
+                                    value=0.05, var_value=0.03, delay=0),
                             learning_rule=Hebb)
         proj.set_learning_parameters({ 
-            'tau': 50.0,
+            'tau': 300.0,
             'min_value': 0.0,
             'max_value': 1.0
         })
