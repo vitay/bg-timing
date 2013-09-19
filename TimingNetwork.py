@@ -194,7 +194,7 @@ class TimingNetwork(Network):
             'threshold_up': 0.1,
             'threshold_down': 0.5,
             'tau_state': 200.0,
-            'threshold_exc': 1.5,
+            'threshold_exc': 1.2,
             'threshold_dopa': 0.8  
         })  
         self.population("NAcc").set_variables({
@@ -298,7 +298,7 @@ class TimingNetwork(Network):
                                     value=0.0, var_value=0.0, delay=0), 
                             learning_rule = Hebb )
         proj.set_learning_parameters({
-            'tau': 500.0,
+            'tau': 100.0,
             'min_value': 0.0,
             'max_value': 1.0
         })
@@ -392,7 +392,7 @@ class TimingNetwork(Network):
                 
         # BLA to CE, exc
         self.connect(all2all(pre="BLA", post="CE", connection_type="exc", 
-                             value=0.9, delay=0))
+                             value=1.0, delay=0))
         
 
         #######################
