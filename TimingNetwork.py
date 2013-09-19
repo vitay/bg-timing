@@ -127,7 +127,7 @@ class TimingNetwork(Network):
 #            'tau_adaptation_drive': 400.0,
 #            'tau_adaptation_rate': 200.0 
         })
-        self.population("LH_ON").set_variables({ 'baseline': -0.2 })
+        self.population("LH_ON").set_variables({ 'baseline': 0.0 })
         
 #        # OFF channel
 #        self.add(name="LH_OFF", width=self.nb_gustatory_inputs, 
@@ -183,12 +183,13 @@ class TimingNetwork(Network):
                  neuron=OscillatorNeuron)
         self.population("vmPFC").set_parameters({
             'tau': 1.0,
-            'noise': self.noise,
+            'noise': 0.0,
             'start_oscillate': 0.8,
             'stop_oscillate': 0.2 
         })
         self.population("vmPFC").set_variables({
-            'freq': self.min_freq + (self.max_freq- self.min_freq)* np.random.random(self.population("vmPFC").geometry) 
+            'freq': self.min_freq + (self.max_freq- self.min_freq)* np.random.random(self.population("vmPFC").geometry),
+            'phase': np.pi * np.random.random(self.population("vmPFC").geometry) 
         })  
         
         # Nucleus accumbens
@@ -197,14 +198,14 @@ class TimingNetwork(Network):
         self.population("NAcc").set_parameters({
             'tau': 10.0,
             'noise': self.noise,
-            'threshold_up': 0.1,
-            'threshold_down': 0.5,
+            'threshold_up': 0.0,
+            'threshold_down': 0.6,
             'tau_state': 500.0,
-            'threshold_exc': 1.3,
-            'threshold_dopa': 0.8  
+            'threshold_exc': 1.2,
+            'threshold_dopa': 0.6
         })  
         self.population("NAcc").set_variables({
-            'baseline': -0.3 
+            'baseline': -0.2 
         })        
             
         # Ventral Pallidum
@@ -227,7 +228,7 @@ class TimingNetwork(Network):
                  neuron=DopamineNeuron)
         self.population("VTA").set_parameters({ 
             'tau': 30.0, 
-            'tau_decrease': 50.0, 
+            'tau_decrease': 40.0, 
             'noise': self.noise, 
             'threshold_': 0.0, 
             'max_rate': 1.1 
@@ -291,25 +292,15 @@ class TimingNetwork(Network):
         
         # Gustatory input to PPTN                              
         self.connect(all2all(pre="LH_ON", post="PPTN", connection_type="exc", 
-                             value=1.0, delay=0))
+                             value=0.5, delay=0))
                              
         # CE -> PPTN, exc
         self.connect(all2all(pre="CE", post="PPTN", connection_type="exc",
-                             value=1.5, delay=0) )
+                             value=1.0, delay=0) )
         # PPTN -> VTA, exc
         self.connect(all2all(pre="PPTN", post="VTA", connection_type="exc",
-                             value=1.5, delay=0) )
+                             value=2, delay=0) )
                              
-        # NAcc -> VTA, mod
-        proj = self.connect(all2all(pre="NAcc", post="VTA", connection_type="mod",
-                                    value=0.0, var_value=0.0, delay=0), 
-                            learning_rule = Hebb )
-        proj.set_learning_parameters({
-            'tau': 100.0,
-            'min_value': 0.0,
-            'max_value': 1.0
-        })
-        
         # PPTN -> VP, exc
         self.connect(all2all(pre="PPTN", post="VP", connection_type="exc", 
                              value=0.5, delay=0))
@@ -376,7 +367,7 @@ class TimingNetwork(Network):
                                     value=0.0, delay=0),
                             learning_rule=DA_Covariance ) 
         proj.set_learning_parameters({
-            'tau': 300.0,
+            'tau': 100.0,
             'min_value': -0.2,
             'K_alpha': 5.0,
             'tau_alpha': 10.0,
@@ -430,13 +421,14 @@ class TimingNetwork(Network):
                              value=0.0, var_value=0.2,  delay=0),
                      learning_rule=DA_Covariance)
         proj.set_learning_parameters({
-            'tau': 50.0,
+            'tau': 20.0,
             'min_value': -1.0,
             'K_alpha': 10.0,
-            'tau_alpha': 10.0,
-            'DA_threshold_positive': 0.7,
+            'tau_alpha': 1.0,
+            'regularization_threshold': 0.9,
+            'DA_threshold_positive': 0.6,
             'DA_threshold_negative': 0.3,
-            'DA_K_positive': 6.0,
+            'DA_K_positive': 4.0,
             'DA_K_negative': 1.0
         })
 
@@ -449,6 +441,17 @@ class TimingNetwork(Network):
             'min_value': 0.0,
             'max_value': 1.0
         })
+        
+        # NAcc -> VTA, mod
+        proj = self.connect(all2all(pre="NAcc", post="VTA", connection_type="mod",
+                                    value=0.0, var_value=0.0, delay=0), 
+                            learning_rule = Hebb )
+        proj.set_learning_parameters({
+            'tau': 100.0,
+            'min_value': 0.0,
+            'max_value': 1.0
+        })
+        
         
 
 
