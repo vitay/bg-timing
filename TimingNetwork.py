@@ -45,16 +45,18 @@ class TimingNetwork(Network):
     '''Network for the learning of CS-US intervals.'''
     def __init__(self):
         Network.__init__(self)
+        # Parameters 
+        self.noise = 0.1
         # Number of neurons
         self.nb_visual_inputs = 2
         self.nb_gustatory_inputs = 4
-        self.nb_bla = 5
+        self.nb_bla = 6
         self.nb_visual = 3
         self.nb_oscillators = 30
         self.nb_nacc = 6
         # Frequencies of the oscillators
-        self.min_freq=2.0
-        self.max_freq=6.0
+        self.min_freq=4.0
+        self.max_freq=8.0
 
     def build(self):
 
@@ -72,7 +74,8 @@ class TimingNetwork(Network):
                  neuron=LinearNeuron)
         self.population("VIS").set_parameters({ 
             'tau': 10.0, 
-            'threshold': 0.0 
+            'threshold': 0.0,
+            'noise': self.noise
         })
 
         # Gustatory Input
@@ -81,7 +84,8 @@ class TimingNetwork(Network):
         self.population("GUS").set_parameters({ 
             'tau': 10.0, 
             'noise': 0.0, 
-            'threshold': 0.0 
+            'threshold': 0.0,
+            'noise': self.noise
         })
 
         # Drive inputs
@@ -90,7 +94,8 @@ class TimingNetwork(Network):
         self.population("DRIVE").set_parameters({ 
             'tau': 10.0, 
             'noise': 0.0, 
-            'threshold': 0.0
+            'threshold': 0.0,
+            'noise': self.noise
         })
         self.population("DRIVE").set_variables({
             'baseline': 1.0 
@@ -101,8 +106,9 @@ class TimingNetwork(Network):
                  neuron=LinearNeuron)
         self.population("IT").set_parameters({
             'tau': 10.0, 
-            'noise': 0.3, 
-            'threshold': 0.0 
+            'noise': 0.2, 
+            'threshold': 0.0 ,
+            'noise': self.noise
         })
 
         
@@ -115,28 +121,28 @@ class TimingNetwork(Network):
                  neuron=GatedNeuron)
         self.population("LH_ON").set_parameters({
             'tau': 10.0,
-            'noise': 0.1,
+            'noise': self.noise,
             'threshold': 0.0,
-            'tau_adaptation_input': 2000.0,
-            'tau_adaptation_drive': 400.0,
-            'tau_adaptation_rate': 200.0 
+#            'tau_adaptation_input': 2000.0,
+#            'tau_adaptation_drive': 400.0,
+#            'tau_adaptation_rate': 200.0 
         })
         self.population("LH_ON").set_variables({ 'baseline': -0.2 })
         
-        # OFF channel
-        self.add(name="LH_OFF", width=self.nb_gustatory_inputs, 
-                 neuron=GatedNeuron)
-        self.population("LH_OFF").set_parameters({
-            'tau': 10.0,
-            'noise': 0.1,
-            'threshold': 0.0,
-            'tau_adaptation_input': 2000.0,
-            'tau_adaptation_drive': 400.0,
-            'tau_adaptation_rate': 200.0 
-        })
-        self.population("LH_OFF").set_variables({
-            'baseline': -0.2 
-        })
+#        # OFF channel
+#        self.add(name="LH_OFF", width=self.nb_gustatory_inputs, 
+#                 neuron=GatedNeuron)
+#        self.population("LH_OFF").set_parameters({
+#            'tau': 10.0,
+#            'noise': self.noise,
+#            'threshold': 0.0,
+#            'tau_adaptation_input': 2000.0,
+#            'tau_adaptation_drive': 400.0,
+#            'tau_adaptation_rate': 200.0 
+#        })
+#        self.population("LH_OFF").set_variables({
+#            'baseline': -0.2 
+#        })
         
         #######################
         # Amygdala
@@ -147,7 +153,7 @@ class TimingNetwork(Network):
                  neuron=ModulatedPhasicNeuron)
         self.population("BLA").set_parameters({
             'tau': 10.0,
-            'noise': 0.1,
+            'noise': self.noise,
             'fb_mod': 0.1,
             'fb_exc': 0.5,
             'tau_adaptation': 500.0 
@@ -161,7 +167,7 @@ class TimingNetwork(Network):
                  neuron=LinearNeuron)
         self.population("CE").set_parameters({
             'tau': 10.0, 
-            'noise': 0.1, 
+            'noise': self.noise, 
             'threshold': 0.0 
         })
         self.population("CE").set_variables({
@@ -177,7 +183,7 @@ class TimingNetwork(Network):
                  neuron=OscillatorNeuron)
         self.population("vmPFC").set_parameters({
             'tau': 1.0,
-            'noise': 0.0,
+            'noise': self.noise,
             'start_oscillate': 0.8,
             'stop_oscillate': 0.2 
         })
@@ -190,11 +196,11 @@ class TimingNetwork(Network):
                  neuron=StriatalNeuron)
         self.population("NAcc").set_parameters({
             'tau': 10.0,
-            'noise': 0.0,
+            'noise': self.noise,
             'threshold_up': 0.1,
             'threshold_down': 0.5,
-            'tau_state': 200.0,
-            'threshold_exc': 1.2,
+            'tau_state': 500.0,
+            'threshold_exc': 1.3,
             'threshold_dopa': 0.8  
         })  
         self.population("NAcc").set_variables({
@@ -206,7 +212,7 @@ class TimingNetwork(Network):
                  neuron=ShuntingExcitationNeuron)
         self.population("VP").set_parameters({
             'tau': 10.0,
-            'noise': 0.0
+            'noise': self.noise
         })
         self.population("VP").set_variables({
             'baseline': 0.5 
@@ -221,8 +227,8 @@ class TimingNetwork(Network):
                  neuron=DopamineNeuron)
         self.population("VTA").set_parameters({ 
             'tau': 30.0, 
-            'tau_decrease': 30.0, 
-            'noise': 0.1, 
+            'tau_decrease': 50.0, 
+            'noise': self.noise, 
             'threshold_': 0.0, 
             'max_rate': 1.1 
         })
@@ -236,7 +242,7 @@ class TimingNetwork(Network):
                  neuron=LinearNeuron)
         self.population("RMTg").set_parameters({
             'tau': 10.0, 
-            'noise': 0.1, 
+            'noise': self.noise, 
             'threshold': 0.5, 
             'max_rate': 1.1
         })
@@ -249,7 +255,7 @@ class TimingNetwork(Network):
                  neuron=LinearNeuron)
         self.population("LHb").set_parameters({
             'tau': 10.0,
-            'noise': 0.1, 
+            'noise': self.noise, 
             'threshold': 0.0, 
             'max_rate': 1.1
         })
@@ -262,7 +268,7 @@ class TimingNetwork(Network):
                  neuron=PhasicNeuron)
         self.population("PPTN").set_parameters({
             'tau': 10.0,
-            'noise': 0.0,
+            'noise': self.noise,
             'tau_adaptation': 200.0
         })
         self.population("PPTN").set_variables({
@@ -278,6 +284,7 @@ class TimingNetwork(Network):
         # Visual inputs to IT
         self.connect(fixed_number_pre(pre="VIS", post="IT", connection_type="exc", 
                                       value=1.0, number=1, delay=0 ) )
+        
         #######################
         # VTA and RMTg
         #######################
@@ -291,7 +298,7 @@ class TimingNetwork(Network):
                              value=1.5, delay=0) )
         # PPTN -> VTA, exc
         self.connect(all2all(pre="PPTN", post="VTA", connection_type="exc",
-                             value=1.0, delay=0) )
+                             value=1.5, delay=0) )
                              
         # NAcc -> VTA, mod
         proj = self.connect(all2all(pre="NAcc", post="VTA", connection_type="mod",
@@ -317,7 +324,7 @@ class TimingNetwork(Network):
         self.connect(all2all(pre="LHb", post="RMTg", connection_type="exc", 
                              value=1.5, delay=0))
                              
-        # RMTg -> VTA, inh # Currently shut off!
+        # RMTg -> VTA, inh
         self.connect(all2all(pre="RMTg", post="VTA", connection_type="inh", 
                              value=1.0, delay=0))
         
@@ -333,13 +340,13 @@ class TimingNetwork(Network):
         self.connect(one2one(pre="DRIVE", post="LH_ON", connection_type="drive", 
                              value=0.5, delay=0))
                              
-        # Drive to the OFF channel
-        self.connect(one2one(pre="DRIVE", post="LH_OFF", connection_type="drive", 
-                             value=0.5, delay=0))
-                             
-        # Competiton between the ON and OFF channels
-        self.connect(one2one(pre="LH_ON", post="LH_OFF", connection_type="inh", 
-                             value=2.0, delay=0))
+#        # Drive to the OFF channel
+#        self.connect(one2one(pre="DRIVE", post="LH_OFF", connection_type="drive", 
+#                             value=0.5, delay=0))
+#                             
+#        # Competiton between the ON and OFF channels
+#        self.connect(one2one(pre="LH_ON", post="LH_OFF", connection_type="inh", 
+#                             value=2.0, delay=0))
             
         #######################
         # Amygdala
@@ -356,7 +363,7 @@ class TimingNetwork(Network):
         proj.set_learning_parameters({
             'tau': 10.0,
             'min_value': -0.2,
-            'K_alpha': 100.0,
+            'K_alpha': 5.0,
             'tau_alpha': 10.0,
             'DA_threshold_positive': 0.6,
             'DA_threshold_negative': 0.4,
@@ -369,9 +376,9 @@ class TimingNetwork(Network):
                                     value=0.0, delay=0),
                             learning_rule=DA_Covariance ) 
         proj.set_learning_parameters({
-            'tau': 100.0,
+            'tau': 300.0,
             'min_value': -0.2,
-            'K_alpha': 50.0,
+            'K_alpha': 5.0,
             'tau_alpha': 10.0,
             'DA_threshold_positive': 0.6,
             'DA_threshold_negative': 0.4,
@@ -409,20 +416,27 @@ class TimingNetwork(Network):
         
         # Competition in NAcc
         self.connect(all2all(pre="NAcc", post="NAcc", connection_type="inh", 
-                             value=0.2, delay=0))
+                             value=0.6, delay=0),
+                             learning_rule=AntiHebb )  
+        proj.set_learning_parameters({  
+            'tau': 100.0,
+            'theta': 0.001,
+            'min_value': 0.0,
+            'max_value': 2.0
+        })
         
         # Timing information from vmPFC to NAcc
         proj = self.connect(all2all(pre="vmPFC", post="NAcc", connection_type="exc", 
                              value=0.0, var_value=0.2,  delay=0),
                      learning_rule=DA_Covariance)
         proj.set_learning_parameters({
-            'tau': 20.0,
+            'tau': 50.0,
             'min_value': -1.0,
             'K_alpha': 10.0,
             'tau_alpha': 10.0,
-            'DA_threshold_positive': 0.8,
+            'DA_threshold_positive': 0.7,
             'DA_threshold_negative': 0.3,
-            'DA_K_positive': 5.0,
+            'DA_K_positive': 6.0,
             'DA_K_negative': 1.0
         })
 
@@ -431,7 +445,7 @@ class TimingNetwork(Network):
                                     value=0.05, var_value=0.03, delay=0),
                             learning_rule=Hebb)
         proj.set_learning_parameters({ 
-            'tau': 300.0,
+            'tau': 500.0,
             'min_value': 0.0,
             'max_value': 1.0
         })

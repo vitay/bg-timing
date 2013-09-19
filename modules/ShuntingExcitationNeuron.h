@@ -18,7 +18,7 @@ class ShuntingExcitationNeuron : public annarNeuron
         virtual void step(){
 
             // Update the membrane potential
-            mp_ += dt_ /tau_ * (-mp_ + sum("exc") - positive(1.0 - sum("exc")) * sum("inh") + baseline_ + noise_*(2.0*rand_num -1.0));
+            mp_ += dt_ /tau_ * (-mp_ + sum("exc") - (sum("exc") < 0.2? sum("inh") : 0.0) + baseline_ + noise_*(2.0*rand_num -1.0));
 
             // Update the instantaneous firing rate
             rate_ = positive(mp_ - threshold_);
