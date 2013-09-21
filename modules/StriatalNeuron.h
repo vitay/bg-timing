@@ -27,9 +27,15 @@ class StriatalNeuron : public annarNeuron
             threshold_exc_=1.0;
             threshold_dopa_=0.7;
             
+            vmpfc_ = 0.0;
+            bla_ = 0.0;
         };
 
         virtual void step(){
+        
+            // Store weigthed sums
+            vmpfc_ = sum("mod");
+            bla_ = sum("exc");
         
             // Updating the state of the neuron
             if(up_down_){ // up-state
@@ -41,7 +47,7 @@ class StriatalNeuron : public annarNeuron
             }
             else{ // down-state
                 upstate_+= dt_/tau_state_* ( 1.0 -upstate_);
-                if( (sum("dopa")>threshold_dopa_) || (sum("exc")>threshold_exc_) || (upstate_>0.95)  ){ // transition to the up-state
+                if( (sum("dopa")>threshold_dopa_) || (vmpfc_ + bla_ > threshold_exc_) || (upstate_>0.95)  ){ // transition to the up-state
                     up_down_=true;
                     upstate_=1.0;
                 }
@@ -49,7 +55,7 @@ class StriatalNeuron : public annarNeuron
                 
         
             // Firing rate of the neuron
-            mp_+= dt_ /tau_ * (-mp_ + sum("exc") -  sum("inh") + baseline_ + noise_*(2.0*rand_num-1.0));
+            mp_+= dt_ /tau_ * (-mp_ + vmpfc_ + bla_ -  sum("inh") + baseline_ + noise_*(2.0*rand_num-1.0));
             
             if(up_down_){
                 rate_=positive(mp_-threshold_up_);
@@ -74,6 +80,9 @@ class StriatalNeuron : public annarNeuron
         @VARIABLE FLOAT upstate_; // Up-state
         @VARIABLE FLOAT downstate_; // Down-state
               
+        @VARIABLE FLOAT vmpfc_; // input from vmPFC
+        @VARIABLE FLOAT bla_; // input from BLA
+        
         // Internals
         bool up_down_;
 
