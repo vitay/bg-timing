@@ -40,7 +40,7 @@ class StriatalNeuron : public annarNeuron
             // Updating the state of the neuron
             if(up_down_){ // up-state
                 upstate_+= dt_/tau_state_* ( 0.0 - upstate_); 
-                if( (upstate_<0.05) || (upstate_ < 0.5 && rate_ < 0.1) || (sum("dopa")< 0.1) ){ // transition to the down-state
+                if( (upstate_<0.05) || (upstate_ < 0.5 && rate_ < 0.1) || (sum("inh") > 1.0) ){ // transition to the down-state
                     up_down_=false;
                     upstate_=0.0;
                 }  

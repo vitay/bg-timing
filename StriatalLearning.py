@@ -9,7 +9,10 @@ from TimingNetwork import *
 net = TimingNetwork()
 net.build()
 
-recorded_areas = ['VTA', {'population':'NAcc', 'variables': ['rate', 'vmpfc', 'bla']}, 'BLA']
+recorded_areas = ['VTA', 
+                  {'population':'NAcc', 'variables': ['rate', 'vmpfc', 'bla']}, 
+                  {'population':'NAcc_pred', 'variables': ['rate', 'vmpfc', 'bla']}, 
+                  'BLA']
 
 # Habituate the network to the gustatory inputs
 for trial in range(10):
@@ -63,8 +66,8 @@ def single_plot(data, ax):
 ##    ax.plot(np.max(np.array(data['NAcc']['vmpfc']), axis=0), label='NAcc - vmPFC')
 ##    ax.plot(np.max(np.array(data['NAcc']['bla']), axis=0), label='NAcc - BLA')
 #    ax.plot(np.max(np.array(data['BLA']['rate']), axis=0), label='BLA')
-
-    ax.imshow(np.array(data['NAcc']['rate']), aspect='auto', cmap=color.hot )
+    data = np.concatenate((np.array(data['NAcc']['rate']), np.array(data['NAcc_pred']['rate'])), axis=0)
+    ax.imshow(data, aspect='auto', cmap=color.hot )
     
 # Plot
 import pylab as plt

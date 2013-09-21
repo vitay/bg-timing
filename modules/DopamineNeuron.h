@@ -12,6 +12,7 @@ class DopamineNeuron : public annarNeuron
 
             tau_ = 30.0;
             tau_decrease_ = 30.0;
+            tau_modulation_ = 500.0;
             threshold_ = 0.0;
             max_rate_ = 1.1;
             
@@ -26,7 +27,7 @@ class DopamineNeuron : public annarNeuron
 
             input_ = sum("exc");
             
-            inhibition_ = sum("mod");
+            inhibition_ += dt_/tau_modulation_ * ( sum("mod") - inhibition_);
 
             mean_input_+= dt_/tau_decrease_* (input_-mean_input_);
             
@@ -47,6 +48,7 @@ class DopamineNeuron : public annarNeuron
         @PARAMETER FLOAT threshold_; // threshold for the firing rate
         @PARAMETER FLOAT max_rate_; // max firing rate
         @PARAMETER FLOAT tau_decrease_; // Time constant for the alpha function.
+        @PARAMETER FLOAT tau_modulation_; // Time constant for the inhibitory modulation from NAcc.
         @VARIABLE FLOAT input_; // Received reward
         @VARIABLE FLOAT mean_input_; // Mean received reward (for phasic activation)
         @VARIABLE FLOAT inhibition_; // Inhibition received from NAcc

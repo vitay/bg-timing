@@ -9,7 +9,7 @@ from TimingNetwork import *
 net = TimingNetwork()
 net.build()
 
-recorded_areas = ['VTA', 'NAcc', 'VP', 'RMTg', 'LHb', 'PPTN']
+recorded_areas = ['VTA', 'NAcc', 'NAcc_pred', 'VP', 'RMTg', 'LHb', 'PPTN']
 
 # Habituate the network to the gustatory inputs
 for trial in range(10):
@@ -54,6 +54,12 @@ extinction_trial(net, 1) # CS1
 omit_CS1 = net.get_recordings()
 extinction_trial(net, 2) # CS2
 omit_CS2 = net.get_recordings()
+ 
+## Deliver reward sonner than expected   
+#sooner_trial(net, 1) # CS1
+#omit_CS1 = net.get_recordings()
+#sooner_trial(net, 2) # CS2
+#omit_CS2 = net.get_recordings()
 
 # Content of a single plot
 def single_plot(data, ax):
@@ -63,6 +69,7 @@ def single_plot(data, ax):
     ax.plot(np.array(data['LHb']['rate'][0]), label='LHb')
     ax.plot(np.array(data['PPTN']['rate'][0]), label='PPTN')
     ax.plot(np.max(np.array(data['NAcc']['rate']), axis=0), label='NAcc')
+    ax.plot(np.max(np.array(data['NAcc_pred']['rate']), axis=0), label='NAcc_pred')
     
 # Plot
 import pylab as plt

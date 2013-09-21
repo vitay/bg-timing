@@ -208,6 +208,22 @@ class TimingNetwork(Network):
             'baseline': -0.2
         })
 
+        # Nucleus accumbens - prediction
+        self.add(name="NAcc_pred", width=self.nb_nacc, height=self.nb_nacc,
+                 neuron=StriatalNeuron)
+        self.population("NAcc_pred").set_parameters({
+            'tau': 10.0,
+            'noise': self.noise,
+            'threshold_up': 0.0,
+            'threshold_down': 0.6,
+            'tau_state': 5000.0,
+            'threshold_exc': 0.5,
+            'threshold_dopa': 0.6
+        })
+        self.population("NAcc_pred").set_variables({
+            'baseline': 0.2
+        })
+        
         # Ventral Pallidum
         self.add(name="VP", width=1,
                  neuron=ShuntingExcitationNeuron)
@@ -229,6 +245,7 @@ class TimingNetwork(Network):
         self.population("VTA").set_parameters({
             'tau': 30.0,
             'tau_decrease': 40.0,
+            'tau_modulation': 500.0,
             'noise': self.noise,
             'threshold': 0.0,
             'max_rate': 1.1
@@ -285,28 +302,32 @@ class TimingNetwork(Network):
         # Visual inputs to IT
         self.connect(fixed_number_pre(pre="VIS", post="IT", connection_type="exc",
                                       value=1.0, number=1, delay=0 ) )
-
-        #######################
-        # VTA and RMTg
-        #######################
+                                      
+        # Visual input to vmPFC
+        self.connect(stripes(pre="VIS", post="vmPFC", connection_type="exc",
+                             value=1.0, delay=0))
 
         # Gustatory input to PPTN
         self.connect(all2all(pre="LH_ON", post="PPTN", connection_type="exc",
                              value=0.5, delay=0))
 
+        #######################
+        # VTA and RMTg
+        #######################
+
         # CE -> PPTN, exc
         self.connect(all2all(pre="CE", post="PPTN", connection_type="exc",
-                             value=1.0, delay=0) )
+                             value=1.5, delay=0) )
         # PPTN -> VTA, exc
         self.connect(all2all(pre="PPTN", post="VTA", connection_type="exc",
-                             value=2, delay=0) )
+                             value=1.5, delay=0) )
 
         # PPTN -> VP, exc
         self.connect(all2all(pre="PPTN", post="VP", connection_type="exc",
-                             value=0.5, delay=0))
+                             value=0.2, delay=0))
         # VP -> RMTg, inh
         self.connect(all2all(pre="VP", post="RMTg", connection_type="inh",
-                             value=0.5, delay=0))
+                             value=1.0, delay=0))
         # VP -> LHb, inh
         self.connect(all2all(pre="VP", post="LHb", connection_type="inh",
                              value=3.0, delay=0))
@@ -352,9 +373,9 @@ class TimingNetwork(Network):
                                     value=0.5, var_value= 0.1, delay=0),
                             learning_rule=DA_Covariance )
         proj.set_learning_parameters({
-            'tau': 10.0,
+            'tau': 100.0,
             'min_value': 0.0,
-            'K_alpha': 5.0,
+            'K_alpha': 2.0,
             'tau_alpha': 1.0,
             'regularization_threshold': 1.0,
             'DA_threshold_positive': 0.6,
@@ -399,45 +420,25 @@ class TimingNetwork(Network):
         # Basal Ganglia
         #######################
 
-        # Visual input to vmPFC
-        self.connect(stripes(pre="VIS", post="vmPFC", connection_type="exc",
-                             value=1.0, delay=0))
-
         # Dopaminergic modulation of NAcc
         self.connect(all2all(pre="VTA", post="NAcc", connection_type="dopa",
                              value=1.0, delay=0))
 
         # Competition in NAcc
-        self.connect(all2all(pre="NAcc", post="NAcc", connection_type="inh",
+        proj = self.connect(all2all(pre="NAcc", post="NAcc", connection_type="inh",
                              value=0.6, delay=0),
                              learning_rule=AntiHebb )
         proj.set_learning_parameters({
-            'tau': 10.0,
-            'theta': 0.001,
+            'tau': 1000.0,
+            'theta': 0.01,
             'min_value': 0.0,
-            'max_value': 2.0
+            'max_value': 1.0
         })
-
-#        # Reward information from BLA to NAcc
-#        proj = self.connect(all2all(pre="BLA", post="NAcc", connection_type="exc",
-#                             value=0.0, var_value=0.2,  delay=0),
-#                     learning_rule=DA_Covariance)
-#        proj.set_learning_parameters({
-#            'tau': 20.0,
-#            'min_value': 0.0,
-#            'K_alpha': 10.0,
-#            'tau_alpha': 1.0,
-#            'regularization_threshold': 0.9,
-#            'DA_threshold_positive': 0.7,
-#            'DA_threshold_negative': 0.3,
-#            'DA_K_positive': 4.0,
-#            'DA_K_negative': 1.0
-#        })
 
         # Timing information from vmPFC to NAcc
         proj = self.connect(all2all(pre="vmPFC", post="NAcc", connection_type="mod",
-                             value=0.0, var_value=0.2,  delay=0),
-                     learning_rule=DA_Covariance)
+                                    value=0.0, var_value=0.1,  delay=0),
+                            learning_rule=DA_Covariance)
         proj.set_learning_parameters({
             'tau': 20.0,
             'min_value': -1.0,
@@ -452,10 +453,10 @@ class TimingNetwork(Network):
 
         # Inhibitory projection from NAcc to VP
         proj = self.connect(all2all(pre="NAcc", post="VP", connection_type="inh",
-                                    value=0.05, var_value=0.03, delay=0),
+                                    value=0.1, var_value=0.0, delay=0),
                             learning_rule=Hebb)
         proj.set_learning_parameters({
-            'tau': 500.0,
+            'tau': 100.0,
             'min_value': 0.0,
             'max_value': 1.0
         })
@@ -470,9 +471,55 @@ class TimingNetwork(Network):
 #            'max_value': 1.0
 #        })
 
+        #######################
+        # Basal Ganglia - prediction
+        #######################
+        
+        # Reward information from BLA to NAcc
+        proj = self.connect(all2all(pre="BLA", post="NAcc_pred", connection_type="mod",
+                                    value=0.0, var_value=0.2,  delay=0),
+                            learning_rule=DA_Covariance)
+        proj.set_learning_parameters({
+            'tau': 500.0,
+            'min_value': 0.0,
+            'K_alpha': 5.0,
+            'tau_alpha': 1.0,
+            'regularization_threshold': 1.0,
+            'DA_threshold_positive': 0.7,
+            'DA_threshold_negative': 0.3,
+            'DA_K_positive': 3.0,
+            'DA_K_negative': 1.0
+        })
+        
+        # Dopaminergic modulation of NAcc
+        self.connect(all2all(pre="VTA", post="NAcc_pred", connection_type="dopa",
+                             value=1.0, delay=0))
 
+        # Competition in NAcc
+        proj = self.connect(all2all(pre="NAcc_pred", post="NAcc_pred", connection_type="inh",
+                             value=0.6, delay=0),
+                             learning_rule=AntiHebb )
+        proj.set_learning_parameters({
+            'tau': 10.0,
+            'theta': 0.001,
+            'min_value': 0.0,
+            'max_value': 2.0
+        })
+        
+        # Inhibitory projection from VP to NAcc
+        proj = self.connect(all2all(pre="VP", post="NAcc_pred", connection_type="inh",
+                                    value=0.5, var_value=0.0, delay=0),
+                            )
 
-
+        # NAcc -> VTA, mod
+        proj = self.connect(all2all(pre="NAcc_pred", post="VTA", connection_type="mod",
+                                    value=0.0, var_value=0.0, delay=0),
+                            learning_rule = Hebb )
+        proj.set_learning_parameters({
+            'tau': 1000.0,
+            'min_value': 0.0,
+            'max_value': 2.0
+        })
 
 
 # Habituate the network to gustatory inputs
@@ -545,6 +592,35 @@ def extinction_trial(net, CS=None):
     net.execute(1000*(CS+1))
     # DO NOT Present the US for 1s
     #net.population('GUS').set_variables({'baseline': GUS})
+    net.execute(1000)
+    # Reset for 1s
+    for neur in net.population('VIS'):
+        neur.baseline = 0.0
+    for neur in net.population('GUS'):
+        neur.baseline = 0.0
+    net.execute(1000)
+
+# Reward is delivered sooner than expected
+def sooner_trial(net, CS=None):
+    # Reset for 1s
+    for neur in net.population('VIS'):
+        neur.baseline = 0.0
+    for neur in net.population('GUS'):
+        neur.baseline = 0.0
+    net.execute(1000)
+    # Select the CS randomly if not given
+    if not CS:
+        CS = np.random.randint(2) + 1
+    VIS = [0.0, 0.0]
+    GUS = [1.0, 0.0, 0.0, 0.0]
+    VIS[CS-1] = 1.0
+    GUS[CS] = 1.0
+    print 'Conditioning: ', VIS, GUS
+    # Present CS1 for 1s, CS2 for 2s: sooner than what was learned
+    net.population('VIS').set_variables({'baseline': VIS})
+    net.execute(1000*(CS))
+    # Present the US for 1s
+    net.population('GUS').set_variables({'baseline': GUS})
     net.execute(1000)
     # Reset for 1s
     for neur in net.population('VIS'):
