@@ -10,8 +10,7 @@ net = TimingNetwork()
 net.build()
 
 recorded_areas = ['VTA', 
-                  {'population':'NAcc', 'variables': ['rate', 'vmpfc', 'bla']}, 
-                  {'population':'NAcc_pred', 'variables': ['rate', 'vmpfc', 'bla']}, 
+                  {'population':'NAcc', 'variables': ['rate', 'vmpfc', 'bla', 'upstate']}, 
                   'BLA']
 
 # Habituate the network to the gustatory inputs
@@ -60,14 +59,14 @@ omit_CS2 = net.get_recordings()
 
 # Content of a single plot
 def single_plot(data, ax):
-#    ax.set_ylim((0., 1.2))
-#    ax.plot(np.array(data['VTA']['rate'][0]), label='VTA')
-#    ax.plot(np.max(np.array(data['NAcc']['rate']), axis=0), label='NAcc')
-##    ax.plot(np.max(np.array(data['NAcc']['vmpfc']), axis=0), label='NAcc - vmPFC')
-##    ax.plot(np.max(np.array(data['NAcc']['bla']), axis=0), label='NAcc - BLA')
-#    ax.plot(np.max(np.array(data['BLA']['rate']), axis=0), label='BLA')
-    data = np.concatenate((np.array(data['NAcc']['rate']), np.array(data['NAcc_pred']['rate'])), axis=0)
-    ax.imshow(data, aspect='auto', cmap=color.hot )
+    ax.set_ylim((0., 1.2))
+    ax.plot(np.array(data['VTA']['rate'][0]), label='VTA')
+    ax.plot(np.max(np.array(data['NAcc']['rate']), axis=0), label='NAcc')
+    ax.plot(np.max(np.array(data['NAcc']['upstate']), axis=0), label='NAcc - upstate')
+    ax.plot(np.max(np.array(data['NAcc']['vmpfc']), axis=0), label='NAcc - vmpfc')
+    ax.plot(np.max(np.array(data['BLA']['rate']), axis=0), label='BLA')
+#    data = np.concatenate((np.array(data['NAcc']['rate']), np.array(data['NAcc_pred']['rate'])), axis=0)
+#    ax.imshow(data, aspect='auto', cmap=color.hot )
     
 # Plot
 import pylab as plt
@@ -77,7 +76,7 @@ ax = plt.subplot(421)
 ax.set_title('CS1 - US1')
 ax.set_ylabel('Before conditioning')
 single_plot(before_CS1, ax)
-#ax.legend(loc=2)#, fontsize='small', frameon=False)
+ax.legend(loc=2)#, fontsize='small', frameon=False)
 ax = plt.subplot(422)
 ax.set_title('CS2 - US2')
 single_plot(before_CS2, ax)
