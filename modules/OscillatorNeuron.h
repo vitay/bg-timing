@@ -36,7 +36,9 @@ class OscillatorNeuron : public annarNeuron
             
             mp_+= 1.0 /tau_ * ( -mp_ 
                 + (oscillating_? 
-                        /*(1.0 - exp(-t_ / 500.0)) * */ above(sin(2.0*M_PI*freq_*FLOAT(t_)/1000.0 + phase_))
+                        /*(1.0 - exp(-t_ / 500.0)) * */ 
+                        //above(sin(2.0*M_PI*freq_*FLOAT(t_)/1000.0 + phase_))
+                        0.5*(sin(2.0*M_PI*freq_*FLOAT(t_)/1000.0 + phase_) + 1.0)
                         : 0.0) 
                 + baseline_ + noise_*(2.0*rand_num-1.0));
             

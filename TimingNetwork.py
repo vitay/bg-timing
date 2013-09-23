@@ -52,7 +52,7 @@ class TimingNetwork(Network):
         self.nb_gustatory_inputs = 4
         self.nb_bla = 6
         self.nb_visual = 3
-        self.nb_oscillators = 30
+        self.nb_oscillators = 50
         self.nb_nacc = 6
         # Frequencies of the oscillators
         self.min_freq=4.0
@@ -192,6 +192,20 @@ class TimingNetwork(Network):
             'phase': np.pi * np.random.random(self.population("vmPFC").geometry)
         })
 
+        # Ventromedial prefrontal cortex
+        self.add(name="HIPP", width=self.nb_visual_inputs, height=self.nb_oscillators,
+                 neuron=OscillatorNeuron)
+        self.population("HIPP").set_parameters({
+            'tau': 1.0,
+            'noise': 0.0,
+            'start_oscillate': 0.8,
+            'stop_oscillate': 0.2
+        })
+        self.population("HIPP").set_variables({
+            'freq': 0.1 + 1.1* np.random.random(self.population("HIPP").geometry),
+            'phase': np.pi * np.random.random(self.population("HIPP").geometry)
+        })
+
         # Nucleus accumbens
         self.add(name="NAcc", width=self.nb_nacc, height=self.nb_nacc,
                  neuron=StriatalNeuron)
@@ -199,7 +213,7 @@ class TimingNetwork(Network):
             'tau': 10.0,
             'noise': self.noise,
             'threshold_up': 0.0,
-            'threshold_down': 0.6,
+            'threshold_down': 0.7,
             'tau_state': 500.0,
             'threshold_exc': 1.2,
             'threshold_dopa': 0.6
@@ -216,8 +230,8 @@ class TimingNetwork(Network):
             'noise': self.noise,
             'threshold_up': 0.0,
             'threshold_down': 0.6,
-            'tau_state': 5000.0,
-            'threshold_exc': 0.5,
+            'tau_state': 500.0,
+            'threshold_exc': 1.2,
             'threshold_dopa': 0.6
         })
         self.population("NAcc_pred").set_variables({
@@ -305,6 +319,10 @@ class TimingNetwork(Network):
                                       
         # Visual input to vmPFC
         self.connect(stripes(pre="VIS", post="vmPFC", connection_type="exc",
+                             value=1.0, delay=0))
+                                      
+        # Visual input to HIPP
+        self.connect(stripes(pre="VIS", post="HIPP", connection_type="exc",
                              value=1.0, delay=0))
 
         # Gustatory input to PPTN
@@ -450,6 +468,23 @@ class TimingNetwork(Network):
             'DA_K_positive': 4.0,
             'DA_K_negative': 1.0
         })
+        
+        # Reward information from BLA to NAcc
+        proj = self.connect(all2all(pre="BLA", post="NAcc", connection_type="mod",
+                                    value=0.0, var_value=0.0,  delay=0),
+                            learning_rule=DA_Covariance)
+        proj.set_learning_parameters({
+            'tau': 500.0,
+            'min_value': 0.0,
+            'K_alpha': 5.0,
+            'tau_alpha': 1.0,
+            'regularization_threshold': 0.8,
+            'DA_threshold_positive': 0.7,
+            'DA_threshold_negative': 0.3,
+            'DA_K_positive': 4.0,
+            'DA_K_negative': 1.0
+        })
+        
 
         # Inhibitory projection from NAcc to VP
         proj = self.connect(all2all(pre="NAcc", post="VP", connection_type="inh",
@@ -475,22 +510,38 @@ class TimingNetwork(Network):
         # Basal Ganglia - prediction
         #######################
         
-        # Reward information from BLA to NAcc
-        proj = self.connect(all2all(pre="BLA", post="NAcc_pred", connection_type="mod",
-                                    value=0.0, var_value=0.2,  delay=0),
+        # Timing information from vmPFC to NAcc
+        proj = self.connect(all2all(pre="HIPP", post="NAcc_pred", connection_type="mod",
+                                    value=0.0, var_value=0.1,  delay=0),
                             learning_rule=DA_Covariance)
         proj.set_learning_parameters({
-            'tau': 500.0,
-            'min_value': 0.0,
-            'K_alpha': 5.0,
+            'tau': 20.0,
+            'min_value': -1.0,
+            'K_alpha': 10.0,
             'tau_alpha': 1.0,
-            'regularization_threshold': 1.0,
+            'regularization_threshold': 0.9,
             'DA_threshold_positive': 0.7,
             'DA_threshold_negative': 0.3,
-            'DA_K_positive': 3.0,
+            'DA_K_positive': 4.0,
             'DA_K_negative': 1.0
         })
-        
+                
+#        # Reward information from BLA to NAcc
+#        proj = self.connect(all2all(pre="BLA", post="NAcc_pred", connection_type="mod",
+#                                    value=0.0, var_value=0.0,  delay=0),
+#                            learning_rule=DA_Covariance)
+#        proj.set_learning_parameters({
+#            'tau': 500.0,
+#            'min_value': 0.0,
+#            'K_alpha': 5.0,
+#            'tau_alpha': 1.0,
+#            'regularization_threshold': 1.0,
+#            'DA_threshold_positive': 0.7,
+#            'DA_threshold_negative': 0.3,
+#            'DA_K_positive': 3.0,
+#            'DA_K_negative': 1.0
+#        })
+#        
         # Dopaminergic modulation of NAcc
         self.connect(all2all(pre="VTA", post="NAcc_pred", connection_type="dopa",
                              value=1.0, delay=0))
@@ -505,21 +556,21 @@ class TimingNetwork(Network):
             'min_value': 0.0,
             'max_value': 2.0
         })
-        
-        # Inhibitory projection from VP to NAcc
-        proj = self.connect(all2all(pre="VP", post="NAcc_pred", connection_type="inh",
-                                    value=0.5, var_value=0.0, delay=0),
-                            )
+#        
+#        # Inhibitory projection from VP to NAcc
+#        proj = self.connect(all2all(pre="VP", post="NAcc_pred", connection_type="inh",
+#                                    value=0.5, var_value=0.0, delay=0),
+#                            )
 
-        # NAcc -> VTA, mod
-        proj = self.connect(all2all(pre="NAcc_pred", post="VTA", connection_type="mod",
-                                    value=0.0, var_value=0.0, delay=0),
-                            learning_rule = Hebb )
-        proj.set_learning_parameters({
-            'tau': 1000.0,
-            'min_value': 0.0,
-            'max_value': 2.0
-        })
+#        # NAcc -> VTA, mod
+#        proj = self.connect(all2all(pre="NAcc_pred", post="VTA", connection_type="mod",
+#                                    value=0.0, var_value=0.0, delay=0),
+#                            learning_rule = Hebb )
+#        proj.set_learning_parameters({
+#            'tau': 1000.0,
+#            'min_value': 0.0,
+#            'max_value': 2.0
+#        })
 
 
 # Habituate the network to gustatory inputs
