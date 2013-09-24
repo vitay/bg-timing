@@ -12,6 +12,7 @@ class DA_Covariance : public annarLearningRule
             min_value_=0.0;
             
             K_LTD_=1.0;
+            tau_dopa_=300.0;
             
             K_alpha_=10.0;
             tau_alpha_=10.0;
@@ -28,6 +29,7 @@ class DA_Covariance : public annarLearningRule
             post_rate = 0.0;
             mean_post = 0.0;
             dopa = 0.0;
+            dopa_mean = 0.5;
             
         };
         
@@ -42,8 +44,9 @@ class DA_Covariance : public annarLearningRule
             alpha_ += dt_/tau_alpha_*(positive(post_rate-regularization_threshold_)-alpha_);
 
             // Dopaminergic modulation
+            dopa_mean += dt_/tau_dopa_ * (dopa - dopa_mean);
             dopa_mod = (dopa>DA_threshold_positive_? 
-                            DA_K_positive_*(dopa - DA_threshold_positive_) 
+                            DA_K_positive_*positive(dopa - dopa_mean) 
                        : (dopa < DA_threshold_negative_? 
                                 DA_K_negative_*(dopa -DA_threshold_negative_) 
                           : 0.0)
@@ -88,6 +91,7 @@ class DA_Covariance : public annarLearningRule
         @PARAMETER FLOAT regularization_threshold_; // Regularization threshold
         @PARAMETER FLOAT K_alpha_; // regularization coefficient
         @PARAMETER FLOAT tau_alpha_; // Time constant coefficient
+        @PARAMETER FLOAT tau_dopa_; // Time constant coefficient
         @PARAMETER FLOAT DA_threshold_positive_; // DA threshold
         @PARAMETER FLOAT DA_threshold_negative_; // DA threshold
         @PARAMETER FLOAT DA_K_positive_; // DA coefficient
@@ -95,7 +99,7 @@ class DA_Covariance : public annarLearningRule
         @PARAMETER FLOAT K_LTD_; // LTD ratio
 
         // Internal
-        FLOAT alpha_, post_rate, mean_post, dopa, dopa_mod;
+        FLOAT alpha_, post_rate, mean_post, dopa, dopa_mod, dopa_mean;
 
 };
 

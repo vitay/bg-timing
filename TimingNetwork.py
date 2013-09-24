@@ -185,13 +185,13 @@ class TimingNetwork(Network):
             'tau': 5.0,
             'noise': self.noise,
             'threshold_up': 0.1,
-            'threshold_down': 0.7,
+            'threshold_down': 0.6,
             'tau_state': 400.0,
-            'threshold_exc': 1.0,
+            'threshold_exc': 0.8,
             'threshold_dopa': 0.7
         })
         self.population("NAcc").set_variables({
-            'baseline': -0.2
+            'baseline': -0.1
         })
         
         # Ventral Pallidum
@@ -404,13 +404,14 @@ class TimingNetwork(Network):
         proj.set_learning_parameters({
             'tau': 20.0,
             'K_LTD': 10.0,
-            'min_value': -0.5,
+            'min_value': -0.2,
             'K_alpha': 10.0,
             'tau_alpha': 10.0,
+            'tau_dopa': 10.0,
             'regularization_threshold': 1.0,
-            'DA_threshold_positive': 0.7,
+            'DA_threshold_positive': 0.6,
             'DA_threshold_negative': 0.1,
-            'DA_K_positive': 1.0,
+            'DA_K_positive': 5.0,
             'DA_K_negative': 1.0
         })
         
@@ -436,7 +437,7 @@ class TimingNetwork(Network):
                                     value=0.1, var_value=0.0, delay=0),
                             learning_rule=Hebb)
         proj.set_learning_parameters({
-            'tau': 100.0,
+            'tau': 20.0,
             'min_value': 0.0,
             'max_value': 1.0,
             'threshold_pre' : 0.0,
@@ -448,9 +449,9 @@ class TimingNetwork(Network):
                                     value=0.0, var_value=0.0, delay=0),
                             learning_rule = Hebb )
         proj.set_learning_parameters({
-            'tau': 1000.0,
+            'tau': 100.0,
             'min_value': 0.0,
-            'max_value': 1.0,
+            'max_value': 10.0,
             'threshold_pre' : 0.0,
             'threshold_post' : 0.5
         })
