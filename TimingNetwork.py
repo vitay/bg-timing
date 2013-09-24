@@ -191,7 +191,7 @@ class TimingNetwork(Network):
             'threshold_dopa': 0.7
         })
         self.population("NAcc").set_variables({
-            'baseline': -0.1
+            'baseline': -0.3
         })
         
         # Ventral Pallidum
@@ -257,7 +257,7 @@ class TimingNetwork(Network):
         self.population("PPTN").set_parameters({
             'tau': 10.0,
             'noise': self.noise,
-            'tau_adaptation': 200.0
+            'tau_adaptation': 100.0
         })
         self.population("PPTN").set_variables({
             'baseline': 0.0
