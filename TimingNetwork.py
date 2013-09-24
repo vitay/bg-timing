@@ -52,11 +52,11 @@ class TimingNetwork(Network):
         self.nb_gustatory_inputs = 4
         self.nb_bla = 6
         self.nb_visual = 3
-        self.nb_oscillators = 50
+        self.nb_oscillators = 30
         self.nb_nacc = 6
         # Frequencies of the oscillators
-        self.min_freq=0.5
-        self.max_freq=6.0
+        self.min_freq = 2.0
+        self.max_freq = 8.0
 
     def build(self):
 
@@ -182,11 +182,11 @@ class TimingNetwork(Network):
         self.add(name="NAcc", width=self.nb_nacc, height=self.nb_nacc,
                  neuron=StriatalNeuron)
         self.population("NAcc").set_parameters({
-            'tau': 10.0,
+            'tau': 5.0,
             'noise': self.noise,
-            'threshold_up': 0.0,
+            'threshold_up': 0.1,
             'threshold_down': 0.7,
-            'tau_state': 450.0,
+            'tau_state': 400.0,
             'threshold_exc': 1.0,
             'threshold_dopa': 0.7
         })
@@ -213,9 +213,9 @@ class TimingNetwork(Network):
         self.add(name="VTA", width=1,
                  neuron=DopamineNeuron)
         self.population("VTA").set_parameters({
-            'tau': 10.0,
+            'tau': 40.0,
             'tau_decrease': 40.0,
-            'tau_modulation': 1.0,
+            'tau_modulation': 500.0,
             'noise': self.noise,
             'threshold': 0.0,
             'max_rate': 1.1
@@ -337,11 +337,11 @@ class TimingNetwork(Network):
         proj.set_learning_parameters({
             'tau': 100.0,
             'min_value': 0.0,
-            'K_alpha': 2.0,
+            'K_alpha': 10.0,
             'tau_alpha': 1.0,
             'regularization_threshold': 1.0,
             'DA_threshold_positive': 0.6,
-            'DA_threshold_negative': 0.4,
+            'DA_threshold_negative': 0.1,
             'DA_K_positive': 10.0,
             'DA_K_negative': 10.0
         })
@@ -351,14 +351,14 @@ class TimingNetwork(Network):
                                     value=0.0, delay=0),
                             learning_rule=DA_Covariance )
         proj.set_learning_parameters({
-            'tau': 1000.0,
+            'tau': 500.0,
             'min_value': 0.0,
-            'K_alpha': 2.0,
+            'K_alpha': 10.0,
             'tau_alpha': 1.0,
             'regularization_threshold': 1.0,
             'DA_threshold_positive': 0.6,
-            'DA_threshold_negative': 0.4,
-            'DA_K_positive': 4.0,
+            'DA_threshold_negative': 0.1,
+            'DA_K_positive': 3.0,
             'DA_K_negative': 1.0
         })
 
@@ -399,16 +399,17 @@ class TimingNetwork(Network):
 
         # Timing information from vmPFC to NAcc
         proj = self.connect(all2all(pre="vmPFC", post="NAcc", connection_type="mod",
-                                    value=0.0, var_value=0.1,  delay=0),
+                                    value=0.0, var_value=0.05,  delay=0),
                             learning_rule=DA_Covariance)
         proj.set_learning_parameters({
             'tau': 20.0,
-            'min_value': -1.0,
+            'K_LTD': 10.0,
+            'min_value': -0.5,
             'K_alpha': 10.0,
-            'tau_alpha': 1.0,
-            'regularization_threshold': 0.9,
+            'tau_alpha': 10.0,
+            'regularization_threshold': 1.0,
             'DA_threshold_positive': 0.7,
-            'DA_threshold_negative': 0.3,
+            'DA_threshold_negative': 0.1,
             'DA_K_positive': 1.0,
             'DA_K_negative': 1.0
         })
@@ -437,7 +438,9 @@ class TimingNetwork(Network):
         proj.set_learning_parameters({
             'tau': 100.0,
             'min_value': 0.0,
-            'max_value': 1.0
+            'max_value': 1.0,
+            'threshold_pre' : 0.0,
+            'threshold_post' : 0.5,
         })
 
         # NAcc -> VTA, mod
@@ -447,7 +450,9 @@ class TimingNetwork(Network):
         proj.set_learning_parameters({
             'tau': 1000.0,
             'min_value': 0.0,
-            'max_value': 1.0
+            'max_value': 1.0,
+            'threshold_pre' : 0.0,
+            'threshold_post' : 0.5
         })
 
 

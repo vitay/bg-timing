@@ -55,7 +55,7 @@ class StriatalNeuron : public annarNeuron
                 
         
             // Firing rate of the neuron
-            mp_+= dt_ /tau_ * (-mp_ + vmpfc_ + bla_ -  sum("inh") + baseline_ + noise_*(2.0*rand_num-1.0));
+            mp_+= dt_ /tau_ * (-mp_ + vmpfc_ + bla_ -  sum("inh") + 0.5* sum("dopa") + baseline_ + noise_*(2.0*rand_num-1.0));
             
             if(up_down_){
                 rate_=positive(mp_-threshold_up_);

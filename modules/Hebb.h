@@ -12,6 +12,8 @@ class Hebb : public annarLearningRule
             tau_=1000.0;
             min_value_=0.0;
             max_value_=1.0;
+            threshold_pre_ = 0.0;
+            threshold_post_ = 0.0;
             
         };
 
@@ -23,7 +25,7 @@ class Hebb : public annarLearningRule
             FLOAT weight=synapse->getValue();
             FLOAT pre_rate= synapse->preRate();
 
-            FLOAT delta=  post_rate* pre_rate ;
+            FLOAT delta=  positive(post_rate - threshold_post_) * positive(pre_rate - threshold_pre_);
 
             weight += dt_/tau_ * delta;
             if(weight < min_value_)
@@ -39,6 +41,8 @@ class Hebb : public annarLearningRule
         @PARAMETER FLOAT tau_; // Learning rate
         @PARAMETER FLOAT min_value_; // Minimal value
         @PARAMETER FLOAT max_value_; // Maximal value
+        @PARAMETER FLOAT threshold_pre_; // Threshold for presynaptic activity
+        @PARAMETER FLOAT threshold_post_; // Threshold for presynaptic activity
 };
 
 #endif

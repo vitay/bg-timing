@@ -11,6 +11,8 @@ class DA_Covariance : public annarLearningRule
             tau_=1000.0;
             min_value_=0.0;
             
+            K_LTD_=1.0;
+            
             K_alpha_=10.0;
             tau_alpha_=10.0;
             regularization_threshold_=1.0;
@@ -68,7 +70,7 @@ class DA_Covariance : public annarLearningRule
                 }
                 else{ 
                     // Only one of the cells is active: LTD
-                    delta= dopa_mod * (post_rate - mean_post)* (pre_rate - mean_pre);
+                    delta= K_LTD_ * dopa_mod * (post_rate - mean_post)* (pre_rate - mean_pre);
                 }
             }
             
@@ -90,6 +92,7 @@ class DA_Covariance : public annarLearningRule
         @PARAMETER FLOAT DA_threshold_negative_; // DA threshold
         @PARAMETER FLOAT DA_K_positive_; // DA coefficient
         @PARAMETER FLOAT DA_K_negative_; // DA coefficient
+        @PARAMETER FLOAT K_LTD_; // LTD ratio
 
         // Internal
         FLOAT alpha_, post_rate, mean_post, dopa, dopa_mod;
