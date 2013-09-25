@@ -416,17 +416,19 @@ class TimingNetwork(Network):
         })
         
 #        # Reward information from BLA to NAcc
-#        proj = self.connect(all2all(pre="BLA", post="NAcc", connection_type="mod",
+#        proj = self.connect(all2all(pre="BLA", post="NAcc", connection_type="exc",
 #                                    value=0.0, var_value=0.0,  delay=0),
 #                            learning_rule=DA_Covariance)
 #        proj.set_learning_parameters({
-#            'tau': 500.0,
+#            'tau': 100.0,
+#            'K_LTD': 1.0,
 #            'min_value': 0.0,
 #            'K_alpha': 5.0,
-#            'tau_alpha': 1.0,
+#            'tau_alpha': 10.0,
+#            'tau_dopa': 50.0,
 #            'regularization_threshold': 0.8,
-#            'DA_threshold_positive': 0.7,
-#            'DA_threshold_negative': 0.3,
+#            'DA_threshold_positive': 0.6,
+#            'DA_threshold_negative': 0.1,
 #            'DA_K_positive': 4.0,
 #            'DA_K_negative': 1.0
 #        })
