@@ -14,6 +14,7 @@ compiler.neurons = ['LinearNeuron',
                     'StriatalNeuron',
                     'ShuntingExcitationNeuron']
 compiler.learning_rules = ['DA_Covariance',
+                           'DA_Copy',
                            'AntiHebb',
                            'Hebb']
 compiler.precision = 'double'
@@ -52,7 +53,7 @@ class TimingNetwork(Network):
         self.nb_gustatory_inputs = 4
         self.nb_bla = 6
         self.nb_visual = 3
-        self.nb_oscillators = 30
+        self.nb_oscillators = 50
         self.nb_nacc = 6
         # Frequencies of the oscillators
         self.min_freq = 2.0
@@ -140,12 +141,12 @@ class TimingNetwork(Network):
         self.population("BLA").set_parameters({
             'tau': 10.0,
             'noise': self.noise,
-            'fb_mod': 0.1,
-            'fb_exc': 0.6,
+            'fb_mod': 0.0,
+            'fb_exc': 1.0,
             'tau_adaptation': 500.0
         })
         self.population("BLA").set_variables({
-            'baseline': -0.2
+            'baseline': 0.0
         })
 
         # CE
@@ -188,7 +189,7 @@ class TimingNetwork(Network):
             'threshold_down': 0.6,
             'tau_state': 400.0,
             'threshold_exc': 0.8,
-            'threshold_dopa': 0.7
+            'threshold_dopa': 0.5
         })
         self.population("NAcc").set_variables({
             'baseline': -0.3
@@ -213,15 +214,15 @@ class TimingNetwork(Network):
         self.add(name="VTA", width=1,
                  neuron=DopamineNeuron)
         self.population("VTA").set_parameters({
-            'tau': 40.0,
-            'tau_decrease': 40.0,
-            'tau_modulation': 500.0,
+            'tau': 30.0,
+            'tau_decrease': 30.0,
+            'tau_modulation': 300.0,
             'noise': self.noise,
             'threshold': 0.0,
             'max_rate': 1.1
         })
         self.population("VTA").set_variables({
-            'baseline': 0.5
+            'baseline': 0.3
         })
 
 
@@ -257,7 +258,7 @@ class TimingNetwork(Network):
         self.population("PPTN").set_parameters({
             'tau': 10.0,
             'noise': self.noise,
-            'tau_adaptation': 100.0
+            'tau_adaptation': 50.0
         })
         self.population("PPTN").set_variables({
             'baseline': 0.0
@@ -278,8 +279,8 @@ class TimingNetwork(Network):
                              value=1.0, delay=0))
 
         # Gustatory input to PPTN
-        self.connect(all2all(pre="LH_ON", post="PPTN", connection_type="exc",
-                             value=0.5, delay=0))
+        self.connect(all2all(pre="LH_ON", post="CE", connection_type="exc",
+                             value=1.0, delay=0))
 
         #######################
         # VTA and RMTg
@@ -287,10 +288,10 @@ class TimingNetwork(Network):
 
         # CE -> PPTN, exc
         self.connect(all2all(pre="CE", post="PPTN", connection_type="exc",
-                             value=1.5, delay=0) )
+                             value=2.0, delay=0) )
         # PPTN -> VTA, exc
         self.connect(all2all(pre="PPTN", post="VTA", connection_type="exc",
-                             value=1.5, delay=0) )
+                             value=1.0, delay=0) )
 
         # PPTN -> VP, exc
         self.connect(all2all(pre="PPTN", post="VP", connection_type="exc",
@@ -332,39 +333,42 @@ class TimingNetwork(Network):
 
         # LH_ON to BLA, exc (US)
         proj = self.connect(all2all(pre="LH_ON", post="BLA", connection_type="exc",
-                                    value=0.5, var_value= 0.1, delay=0),
+                                    value=0.5, var_value= 0.5, delay=0),
                             learning_rule=DA_Covariance )
         proj.set_learning_parameters({
             'tau': 100.0,
             'min_value': 0.0,
+            'K_LTD': 10.0,
             'K_alpha': 10.0,
             'tau_alpha': 1.0,
             'regularization_threshold': 1.0,
-            'DA_threshold_positive': 0.6,
+            'DA_threshold_positive': 0.4,
             'DA_threshold_negative': 0.1,
             'DA_K_positive': 10.0,
-            'DA_K_negative': 10.0
+            'DA_K_negative': 0.0
         })
 
         # IT to BLA, mod (CS)
         proj = self.connect(all2all(pre="IT", post="BLA", connection_type="mod",
                                     value=0.0, delay=0),
-                            learning_rule=DA_Covariance )
+                            learning_rule=DA_Copy )
         proj.set_learning_parameters({
-            'tau': 500.0,
+            'tau': 1000.0,
             'min_value': 0.0,
-            'K_alpha': 10.0,
+            'K_alpha': 1.0,
+            'K_LTD': 1.0,
             'tau_alpha': 1.0,
+            'tau_dopa': 300.0,
             'regularization_threshold': 1.0,
-            'DA_threshold_positive': 0.6,
+            'DA_threshold_positive': 0.4,
             'DA_threshold_negative': 0.1,
-            'DA_K_positive': 3.0,
+            'DA_K_positive': 10.0,
             'DA_K_negative': 1.0
         })
 
         # Competition in BLA, inh
         proj = self.connect(all2all(pre="BLA", post="BLA", connection_type="inh",
-                                    value=0.6, var_value= 0.1, delay=0),
+                                    value=0.6, var_value= 0.0, delay=0),
                             learning_rule=AntiHebb )
         proj.set_learning_parameters({
             'tau': 100.0,
@@ -409,7 +413,7 @@ class TimingNetwork(Network):
             'tau_alpha': 10.0,
             'tau_dopa': 10.0,
             'regularization_threshold': 1.0,
-            'DA_threshold_positive': 0.6,
+            'DA_threshold_positive': 0.4,
             'DA_threshold_negative': 0.1,
             'DA_K_positive': 5.0,
             'DA_K_negative': 1.0
@@ -451,14 +455,20 @@ class TimingNetwork(Network):
                                     value=0.0, var_value=0.0, delay=0),
                             learning_rule = Hebb )
         proj.set_learning_parameters({
-            'tau': 100.0,
+            'tau': 500.0,
             'min_value': 0.0,
-            'max_value': 10.0,
+            'max_value': 20.0,
             'threshold_pre' : 0.0,
-            'threshold_post' : 0.5
+            'threshold_post' : 0.0
         })
 
-
+# Define the stimuli
+US_vector = {'1': [1.0, 1.0, 0.0, 0.0],
+             '2': [1.0, 0.0, 1.0, 0.0],
+             '3': [0.0, 0.0, 1.0, 1.0] }
+US_intensity = {'1': 0.8,
+              '2': 0.5,
+              '3': 0.7 }
 
 # Habituate the network to gustatory inputs
 def valuation_trial(net, US=None):
@@ -469,8 +479,7 @@ def valuation_trial(net, US=None):
     # Select the US randomly if not given
     if not US:
         US = np.random.randint(2) + 1
-    GUS = [1.0, 0.0, 0.0, 0.0]
-    GUS[US] = 1.0
+    GUS = US_vector[str(US)]
     print 'Valuation: ', GUS
     # Let the network learn for 1s
     net.population('GUS').set_variables({'baseline': GUS})
@@ -492,9 +501,8 @@ def conditioning_trial(net, CS=None):
     if not CS:
         CS = np.random.randint(2) + 1
     VIS = [0.0, 0.0]
-    GUS = [1.0, 0.0, 0.0, 0.0]
     VIS[CS-1] = 1.0
-    GUS[CS] = 1.0
+    GUS = [US_intensity[str(CS)]* i for i in US_vector[str(CS)] ]
     print 'Conditioning: ', VIS, GUS
     # Present CS1 for 2s, CS2 for 3s
     net.population('VIS').set_variables({'baseline': VIS})
@@ -521,10 +529,9 @@ def extinction_trial(net, CS=None):
     if not CS:
         CS = np.random.randint(2) + 1
     VIS = [0.0, 0.0]
-    GUS = [1.0, 0.0, 0.0, 0.0]
+    GUS = [0.0, 0.0, 0.0, 0.0]
     VIS[CS-1] = 1.0
-    GUS[CS] = 1.0
-    print 'Conditioning: ', VIS, GUS
+    print 'Extinction: ', VIS, GUS
     # Present CS1 for 2s, CS2 for 3s
     net.population('VIS').set_variables({'baseline': VIS})
     net.execute(1000*(CS+1))
@@ -550,13 +557,12 @@ def sooner_trial(net, CS=None):
     if not CS:
         CS = np.random.randint(2) + 1
     VIS = [0.0, 0.0]
-    GUS = [1.0, 0.0, 0.0, 0.0]
     VIS[CS-1] = 1.0
-    GUS[CS] = 1.0
-    print 'Conditioning: ', VIS, GUS
+    GUS = [US_intensity[str(CS)]* i for i in US_vector[str(CS)] ]
+    print 'Sooner reward: ', VIS, GUS
     # Present CS1 for 1s, CS2 for 2s: sooner than what was learned
     net.population('VIS').set_variables({'baseline': VIS})
-    net.execute(1000*(CS))
+    net.execute(1000*(CS+0.5))
     # Present the US for 1s
     net.population('GUS').set_variables({'baseline': GUS})
     net.execute(1000)
@@ -565,4 +571,4 @@ def sooner_trial(net, CS=None):
         neur.baseline = 0.0
     for neur in net.population('GUS'):
         neur.baseline = 0.0
-    net.execute(1000)
+    net.execute(1500) # To compensate

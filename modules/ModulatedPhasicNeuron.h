@@ -27,9 +27,9 @@ class ModulatedPhasicNeuron : public annarNeuron
             adapted_modulation_ += dt_/tau_adaptation_*(sum("mod") - adapted_modulation_);
             
             mp_+= dt_/tau_ * (-mp_ + positive(sum("exc") - 0.5*adapted_input_) 
-                                        * positive(1.0 - fb_mod_*sum("mod") ) 
+                                        //* positive(1.0 - fb_mod_*sum("mod") ) 
                                         //* (1.0 + dopa_mod_ *(sum("dopa") - 0.5) ) 
-                                   + fb_exc_ * positive(sum("mod") - 0.5*adapted_modulation_) 
+                                   + fb_exc_ * positive(sum("mod") - fb_mod_*adapted_modulation_) * (sum("exc")>0.1? 0.0: 1.0)
                                    - sum("inh") 
                                    + baseline_ 
                                    + noise_*(2.0*rand_num-1.0) );
