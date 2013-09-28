@@ -101,7 +101,11 @@ class TimingNetwork(Network):
         self.population("DRIVE").set_variables({
             'baseline': 1.0
         })
-
+        
+        #######################
+        # Cerebral cortex
+        #######################
+        
         # IT representation of visual inputs
         self.add(name="IT", width=self.nb_visual, height=self.nb_visual,
                  neuron=LinearNeuron)
@@ -112,6 +116,34 @@ class TimingNetwork(Network):
             'noise': self.noise
         })
 
+        # OFC for representation of incentive value
+        self.add(name="OFC", width=self.nb_bla, height=self.nb_bla,
+                 neuron=ModulatedPhasicNeuron)
+        self.population("OFC").set_parameters({
+            'tau': 10.0,
+            'noise': self.noise,
+            'fb_mod': 0.0,
+            'fb_exc': 1.0,
+            'tau_adaptation': 50000.0
+        })
+        self.population("OFC").set_variables({
+            'baseline': 0.0
+        })
+        
+        
+        # Ventromedial prefrontal cortex for the oscillations
+        self.add(name="vmPFC", width=self.nb_visual_inputs, height=self.nb_oscillators,
+                 neuron=OscillatorNeuron)
+        self.population("vmPFC").set_parameters({
+            'tau': 1.0,
+            'noise': 0.0,
+            'start_oscillate': 0.8,
+            'stop_oscillate': 0.2
+        })
+        self.population("vmPFC").set_variables({
+            'freq': self.min_freq + (self.max_freq- self.min_freq)* np.random.random(self.population("vmPFC").geometry),
+            'phase': np.pi * np.random.random(self.population("vmPFC").geometry)
+        })
 
         #######################
         # Lateral hypothalamus
@@ -141,7 +173,7 @@ class TimingNetwork(Network):
         self.population("BLA").set_parameters({
             'tau': 10.0,
             'noise': self.noise,
-            'fb_mod': 0.4,
+            'fb_mod': 0.8,
             'fb_exc': 1.0,
             'tau_adaptation': 500.0
         })
@@ -164,20 +196,6 @@ class TimingNetwork(Network):
         #######################
         # Basal Ganglia
         #######################
-
-        # Ventromedial prefrontal cortex
-        self.add(name="vmPFC", width=self.nb_visual_inputs, height=self.nb_oscillators,
-                 neuron=OscillatorNeuron)
-        self.population("vmPFC").set_parameters({
-            'tau': 1.0,
-            'noise': 0.0,
-            'start_oscillate': 0.8,
-            'stop_oscillate': 0.2
-        })
-        self.population("vmPFC").set_variables({
-            'freq': self.min_freq + (self.max_freq- self.min_freq)* np.random.random(self.population("vmPFC").geometry),
-            'phase': np.pi * np.random.random(self.population("vmPFC").geometry)
-        })
 
         # Nucleus accumbens
         self.add(name="NAcc", width=self.nb_nacc, height=self.nb_nacc,
@@ -291,7 +309,7 @@ class TimingNetwork(Network):
                              value=2.0, delay=0) )
         # PPTN -> VTA, exc
         self.connect(all2all(pre="PPTN", post="VTA", connection_type="exc",
-                             value=1.5, delay=0) )
+                             value=1.0, delay=0) )
 
         # PPTN -> VP, exc
         self.connect(all2all(pre="PPTN", post="VP", connection_type="exc",
@@ -461,6 +479,41 @@ class TimingNetwork(Network):
             'threshold_pre' : 0.0,
             'threshold_post' : 0.0
         })
+        
+        
+        #######################
+        # OFC representation of incentive value
+        #######################
+        
+        # Dopaminergic modulation of OFC
+        self.connect(all2all(pre="VTA", post="OFC", connection_type="dopa",
+                             value=1.0, delay=0))
+                                     
+        # Visual input to OFC
+        proj = self.connect(all2all(pre="IT", post="OFC", connection_type="mod",
+                            value=0.0, delay=0),
+                    learning_rule=DA_Copy )
+        proj.set_learning_parameters({
+            'tau': 500.0,
+            'min_value': 0.0,
+            'K_alpha': 1.0,
+            'K_LTD': 1.0,
+            'tau_alpha': 1.0,
+            'tau_dopa': 300.0,
+            'regularization_threshold': 1.0,
+            'DA_threshold_positive': 0.4,
+            'DA_threshold_negative': 0.1,
+            'DA_K_positive': 10.0,
+            'DA_K_negative': 1.0
+        })
+        
+        # BLA input to OFC
+        proj = self.connect(one2one(pre="BLA", post="OFC", connection_type="exc",
+                                    value=1.0, var_value= 0.0, delay=0) )
+
+#######################
+# Methods for learning
+#######################
 
 # Define the stimuli
 US_vector = {'1': [1.0, 1.0, 0.0, 0.0],

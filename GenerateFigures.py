@@ -13,7 +13,7 @@ save_recordings = False
 save_figures = False
 
 # Recorded data
-recorded_areas = ['BLA', 'GUS', 'VIS', 'LH_ON', 'CE', 'VTA', 'PPTN', 'RMTg', 'VP', 'NAcc']
+recorded_areas = ['BLA', 'GUS', 'VIS', 'LH_ON', 'CE', 'VTA', 'PPTN', 'RMTg', 'VP', 'NAcc', 'OFC']
 valuation_trials = []
 conditioning_trials = []
 extinction_trials = []
@@ -137,6 +137,7 @@ def plot_bla(net):
     def single_plot(data, ax):
         ax.set_ylim((0., 1.2))
         ax.plot(np.max(np.array(data['BLA']['rate']), axis=0), label='BLA max')
+        ax.plot(np.max(np.array(data['OFC']['rate']), axis=0), label='OFC max')
     ax = plt.subplot(521)
     ax.set_title('CS1 - US1')
     ax.set_ylabel('Before conditioning')
