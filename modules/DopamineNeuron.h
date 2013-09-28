@@ -28,7 +28,7 @@ class DopamineNeuron : public annarNeuron
             input_ = sum("exc");
             
             if(sum("mod") > inhibition_)
-                inhibition_ +=  dt_ / 2.0 * (sum("mod") - inhibition_);
+                inhibition_ +=  dt_ / 1.0 * (sum("mod") - inhibition_);
             else
                 inhibition_ += dt_/tau_modulation_ * ( sum("mod") - inhibition_);
 

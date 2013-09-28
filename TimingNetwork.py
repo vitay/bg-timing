@@ -141,7 +141,7 @@ class TimingNetwork(Network):
         self.population("BLA").set_parameters({
             'tau': 10.0,
             'noise': self.noise,
-            'fb_mod': 0.0,
+            'fb_mod': 0.4,
             'fb_exc': 1.0,
             'tau_adaptation': 500.0
         })
@@ -278,9 +278,9 @@ class TimingNetwork(Network):
         self.connect(stripes(pre="VIS", post="vmPFC", connection_type="exc",
                              value=1.0, delay=0))
 
-        # Gustatory input to PPTN
-        self.connect(all2all(pre="LH_ON", post="CE", connection_type="exc",
-                             value=1.0, delay=0))
+#        # Gustatory input to PPTN
+#        self.connect(all2all(pre="LH_ON", post="CE", connection_type="exc",
+#                             value=1.0, delay=0))
 
         #######################
         # VTA and RMTg
@@ -291,7 +291,7 @@ class TimingNetwork(Network):
                              value=2.0, delay=0) )
         # PPTN -> VTA, exc
         self.connect(all2all(pre="PPTN", post="VTA", connection_type="exc",
-                             value=1.0, delay=0) )
+                             value=1.5, delay=0) )
 
         # PPTN -> VP, exc
         self.connect(all2all(pre="PPTN", post="VP", connection_type="exc",
