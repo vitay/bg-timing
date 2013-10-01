@@ -371,13 +371,13 @@ class TimingNetwork(Network):
                                     value=0.0, delay=0),
                             learning_rule=DA_Copy )
         proj.set_learning_parameters({
-            'tau': 1000.0,
+            'tau': 500.0,
             'min_value': 0.0,
-            'K_alpha': 1.0,
-            'K_LTD': 1.0,
-            'tau_alpha': 1.0,
+            #'K_alpha': 1.0,
+            'K_LTD': 5.0,
+            #'tau_alpha': 1.0,
             'tau_dopa': 300.0,
-            'regularization_threshold': 1.0,
+            #'regularization_threshold': 1.0,
             'DA_threshold_positive': 0.4,
             'DA_threshold_negative': 0.1,
             'DA_K_positive': 10.0,
@@ -424,7 +424,7 @@ class TimingNetwork(Network):
                                     value=0.0, var_value=0.05,  delay=0),
                             learning_rule=DA_Covariance)
         proj.set_learning_parameters({
-            'tau': 20.0,
+            'tau': 50.0,
             'K_LTD': 10.0,
             'min_value': -0.2,
             'K_alpha': 10.0,
@@ -433,7 +433,7 @@ class TimingNetwork(Network):
             'regularization_threshold': 1.0,
             'DA_threshold_positive': 0.4,
             'DA_threshold_negative': 0.1,
-            'DA_K_positive': 5.0,
+            'DA_K_positive': 8.0,
             'DA_K_negative': 1.0
         })
         
@@ -516,27 +516,35 @@ class TimingNetwork(Network):
 #######################
 
 # Define the stimuli
-US_vector = {'1': [1.0, 1.0, 0.0, 0.0],
-             '2': [1.0, 0.0, 1.0, 0.0],
-             '3': [0.0, 0.0, 1.0, 1.0] }
-US_intensity = {'1': 0.8,
-              '2': 0.5,
-              '3': 0.7 }
+CS_US = { '1': {'visual': 0,
+                'vector': [1.0, 1.0, 0.0, 0.0],
+                'magnitude': 0.8,
+                'duration': 3000 },
+          '2': {'visual': 1,
+                'vector': [1.0, 0.0, 1.0, 0.0],
+                'magnitude': 0.5,
+                'duration': 4000 },
+          '3': {'visual': 2,
+                'vector': [0.0, 0.0, 1.0, 1.0],
+                'magnitude': 1.0,
+                'duration': 5000 }
+        }
+              
+US_duration = 1000
+sooner_duration = 1000
 
 # Habituate the network to gustatory inputs
-def valuation_trial(net, US=None):
+def valuation_trial(net, US):
     # Reset the network for 500ms
     for neur in net.population('GUS'):
         neur.baseline = 0.0
     net.execute(500)
-    # Select the US randomly if not given
-    if not US:
-        US = np.random.randint(2) + 1
-    GUS = US_vector[str(US)]
+    # Select the US 
+    GUS = CS_US[str(US)]['vector']
     print 'Valuation: ', GUS
     # Let the network learn for 1s
     net.population('GUS').set_variables({'baseline': GUS})
-    net.execute(1000)
+    net.execute(US_duration)
     # Reset the network for 500ms
     for neur in net.population('GUS'):
         neur.baseline = 0.0
@@ -550,19 +558,17 @@ def conditioning_trial(net, CS=None):
     for neur in net.population('GUS'):
         neur.baseline = 0.0
     net.execute(1000)
-    # Select the CS randomly if not given
-    if not CS:
-        CS = np.random.randint(2) + 1
-    VIS = [0.0, 0.0]
-    VIS[CS-1] = 1.0
-    GUS = [US_intensity[str(CS)]* i for i in US_vector[str(CS)] ]
+    # Select the CS 
+    VIS =np.zeros(net.nb_visual_inputs)
+    VIS[CS_US[str(CS)]['visual']] = 1.0
+    GUS = [CS_US[str(CS)]['magnitude']* i for i in CS_US[str(CS)]['vector'] ]
     print 'Conditioning: ', VIS, GUS
     # Present CS1 for 2s, CS2 for 3s
     net.population('VIS').set_variables({'baseline': VIS})
-    net.execute(1000*(CS+1))
+    net.execute(CS_US[str(CS)]['duration'])
     # Present the US for 1s
     net.population('GUS').set_variables({'baseline': GUS})
-    net.execute(1000)
+    net.execute(US_duration)
     # Reset for 1s
     for neur in net.population('VIS'):
         neur.baseline = 0.0
@@ -578,19 +584,17 @@ def extinction_trial(net, CS=None):
     for neur in net.population('GUS'):
         neur.baseline = 0.0
     net.execute(1000)
-    # Select the CS randomly if not given
-    if not CS:
-        CS = np.random.randint(2) + 1
-    VIS = [0.0, 0.0]
+    # Select the CS 
     GUS = [0.0, 0.0, 0.0, 0.0]
-    VIS[CS-1] = 1.0
+    VIS =np.zeros(net.nb_visual_inputs)
+    VIS[CS_US[str(CS)]['visual']] = 1.0
     print 'Extinction: ', VIS, GUS
     # Present CS1 for 2s, CS2 for 3s
     net.population('VIS').set_variables({'baseline': VIS})
-    net.execute(1000*(CS+1))
+    net.execute(CS_US[str(CS)]['duration'])
     # DO NOT Present the US for 1s
     #net.population('GUS').set_variables({'baseline': GUS})
-    net.execute(1000)
+    net.execute(US_duration)
     # Reset for 1s
     for neur in net.population('VIS'):
         neur.baseline = 0.0
@@ -606,22 +610,20 @@ def sooner_trial(net, CS=None):
     for neur in net.population('GUS'):
         neur.baseline = 0.0
     net.execute(1000)
-    # Select the CS randomly if not given
-    if not CS:
-        CS = np.random.randint(2) + 1
-    VIS = [0.0, 0.0]
-    VIS[CS-1] = 1.0
-    GUS = [US_intensity[str(CS)]* i for i in US_vector[str(CS)] ]
+    # Select the CS 
+    VIS =np.zeros(net.nb_visual_inputs)
+    VIS[CS_US[str(CS)]['visual']] = 1.0
+    GUS = [CS_US[str(CS)]['magnitude']* i for i in CS_US[str(CS)]['vector'] ]
     print 'Sooner reward: ', VIS, GUS
     # Present CS1 for 1s, CS2 for 2s: sooner than what was learned
     net.population('VIS').set_variables({'baseline': VIS})
-    net.execute(1000*(CS+0.5))
+    net.execute(CS_US[str(CS)]['duration'] - sooner_duration)
     # Present the US for 1s
     net.population('GUS').set_variables({'baseline': GUS})
-    net.execute(1000)
+    net.execute(US_duration)
     # Reset for 1s
     for neur in net.population('VIS'):
         neur.baseline = 0.0
     for neur in net.population('GUS'):
         neur.baseline = 0.0
-    net.execute(1500) # To compensate
+    net.execute(1000 + sooner_duration) # To compensate
