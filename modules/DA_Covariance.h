@@ -47,8 +47,10 @@ class DA_Covariance : public annarLearningRule
             dopa_mean += dt_/tau_dopa_ * (dopa - dopa_mean);
             dopa_mod = (dopa>DA_threshold_positive_? 
                             DA_K_positive_*positive(dopa - dopa_mean) 
+                            //(dopa > dopa_mean? DA_K_positive_ : 0.0) 
                        : (dopa < DA_threshold_negative_? 
                                 DA_K_negative_*(dopa -DA_threshold_negative_) 
+                                //- DA_K_negative_ 
                           : 0.0)
                         );      
         
@@ -64,7 +66,7 @@ class DA_Covariance : public annarLearningRule
             FLOAT delta = 0.0;
             if((post_rate>mean_post)&&(pre_rate>mean_pre)) { 
                 // Both cells are active:  LTP with DA modulation and regularization
-                delta = dopa_mod * (post_rate - mean_post)* (pre_rate - mean_pre) - K_alpha_*alpha_* positive(post_rate - mean_post)* positive(post_rate - mean_post) * weight;
+                delta = dopa_mod * (post_rate - mean_post)* (pre_rate - mean_pre) - K_alpha_*alpha_* positive(post_rate - mean_post)* positive(post_rate - mean_post) * positive(weight);
             }
             else{
                 if((post_rate<mean_post)&&(pre_rate<mean_pre)) { 

@@ -8,7 +8,7 @@ from TimingNetwork import *
 net = TimingNetwork()
 net.build()
 
-recorded_areas = ['BLA', 'GUS', 'VIS', 'LH_ON', 'CE', 'VTA', 'PPTN']
+recorded_areas = ['BLA', 'GUS', 'VIS', 'LH', 'CE', 'VTA', 'PPTN']
 
 # Habituate the network to the gustatory inputs
 for trial in range(10):
@@ -16,7 +16,7 @@ for trial in range(10):
     valuation_trial(net, 2) # US2
     
 # Stop learning in the LH -> BLA pathway
-net.projection(pre="LH_ON", post="BLA", connection_type="exc").set_learning_parameters({'tau': 10000000.0})
+net.projection(pre="LH", post="BLA", connection_type="exc").set_learning_parameters({'tau': 10000000.0})
     
 # Record BLA before conditioning
 net.record(recorded_areas) 
@@ -63,7 +63,7 @@ def single_plot(data, ax):
     ax.plot(np.array(data['VTA']['rate'][0]), label='VTA')
     ax.plot(np.max(np.array(data['BLA']['rate']), axis=0), label='BLA')
     ax.plot(np.max(np.array(data['CE']['rate']), axis=0), label='CE')
-    ax.plot(np.max(np.array(data['LH_ON']['rate']), axis=0), label='LH_ON')
+    ax.plot(np.max(np.array(data['LH']['rate']), axis=0), label='LH')
     ax.plot(np.max(np.array(data['GUS']['rate']), axis=0), label='GUS')
     ax.plot(np.max(np.array(data['VIS']['rate']), axis=0), label='VIS')
     

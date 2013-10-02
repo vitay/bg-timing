@@ -49,7 +49,7 @@ class DA_Copy : public annarLearningRule
             // Dopaminergic modulation
             dopa_mean += dt_/tau_dopa_ * (dopa - dopa_mean);
             dopa_mod = (dopa > DA_threshold_positive_? 
-                            DA_K_positive_*(dopa - DA_threshold_positive_)
+                            DA_K_positive_//*(dopa - DA_threshold_positive_)
                             //DA_K_positive_*positive(dopa - dopa_mean) 
                        : (dopa < DA_threshold_negative_? 
                             DA_K_negative_*(dopa -DA_threshold_negative_) 

@@ -150,9 +150,9 @@ class TimingNetwork(Network):
         #######################
 
         # ON channel
-        self.add(name="LH_ON", width=self.nb_gustatory_inputs,
+        self.add(name="LH", width=self.nb_gustatory_inputs,
                  neuron=GatedNeuron)
-        self.population("LH_ON").set_parameters({
+        self.population("LH").set_parameters({
             'tau': 10.0,
             'noise': self.noise,
             'threshold': 0.0,
@@ -160,7 +160,7 @@ class TimingNetwork(Network):
 #            'tau_adaptation_drive': 400.0,
 #            'tau_adaptation_rate': 200.0
         })
-        self.population("LH_ON").set_variables({ 'baseline': 0.0 })
+        self.population("LH").set_variables({ 'baseline': 0.0 })
 
 
         #######################
@@ -289,15 +289,15 @@ class TimingNetwork(Network):
         #######################
 
         # Visual inputs to IT
-        self.connect(fixed_number_pre(pre="VIS", post="IT", connection_type="exc",
-                                      value=1.0, number=1, delay=0 ) )
+        self.connect(stripes(pre="VIS", post="IT", connection_type="exc",
+                            value=1.0, delay=0 ) )
                                       
         # Visual input to vmPFC
         self.connect(stripes(pre="VIS", post="vmPFC", connection_type="exc",
                              value=1.0, delay=0))
 
 #        # Gustatory input to PPTN
-#        self.connect(all2all(pre="LH_ON", post="CE", connection_type="exc",
+#        self.connect(all2all(pre="LH", post="CE", connection_type="exc",
 #                             value=1.0, delay=0))
 
         #######################
@@ -335,10 +335,10 @@ class TimingNetwork(Network):
         #######################
 
         # Gustatory input to the ON channel
-        self.connect(one2one(pre="GUS", post="LH_ON", connection_type="exc",
+        self.connect(one2one(pre="GUS", post="LH", connection_type="exc",
                              value=1.0, delay=0))
         # Drive to the ON channel
-        self.connect(one2one(pre="DRIVE", post="LH_ON", connection_type="drive",
+        self.connect(one2one(pre="DRIVE", post="LH", connection_type="drive",
                              value=0.5, delay=0))
 
         #######################
@@ -349,15 +349,16 @@ class TimingNetwork(Network):
         self.connect(all2all(pre="VTA", post="BLA", connection_type="dopa",
                              value=1.0,  delay=0) )
 
-        # LH_ON to BLA, exc (US)
-        proj = self.connect(all2all(pre="LH_ON", post="BLA", connection_type="exc",
-                                    value=0.5, var_value= 0.5, delay=0),
+        # LH to BLA, exc (US)
+        proj = self.connect(fixed_number_pre(pre="LH", post="BLA", connection_type="exc",
+                                    value=0.5, var_value= 0.1, number=2, delay=0),
                             learning_rule=DA_Covariance )
         proj.set_learning_parameters({
             'tau': 100.0,
             'min_value': 0.0,
-            'K_LTD': 10.0,
-            'K_alpha': 10.0,
+            'K_LTD': 1.0,
+            'K_alpha': 5.0,
+            'tau_dopa': 300.0,
             'tau_alpha': 1.0,
             'regularization_threshold': 1.0,
             'DA_threshold_positive': 0.4,
@@ -371,7 +372,7 @@ class TimingNetwork(Network):
                                     value=0.0, delay=0),
                             learning_rule=DA_Copy )
         proj.set_learning_parameters({
-            'tau': 500.0,
+            'tau': 5000.0,
             'min_value': 0.0,
             #'K_alpha': 1.0,
             'K_LTD': 5.0,
@@ -392,7 +393,7 @@ class TimingNetwork(Network):
             'tau': 100.0,
             'theta': 0.001,
             'min_value': 0.0,
-            'max_value': 2.0
+            'max_value': 3.0
         })
 
         # BLA to CE, exc
@@ -421,10 +422,10 @@ class TimingNetwork(Network):
 
         # Timing information from vmPFC to NAcc
         proj = self.connect(all2all(pre="vmPFC", post="NAcc", connection_type="mod",
-                                    value=0.0, var_value=0.05,  delay=0),
+                                    value=0.0, var_value=0.0,  delay=0),
                             learning_rule=DA_Covariance)
         proj.set_learning_parameters({
-            'tau': 50.0,
+            'tau': 20.0,
             'K_LTD': 10.0,
             'min_value': -0.2,
             'K_alpha': 10.0,
@@ -433,28 +434,9 @@ class TimingNetwork(Network):
             'regularization_threshold': 1.0,
             'DA_threshold_positive': 0.4,
             'DA_threshold_negative': 0.1,
-            'DA_K_positive': 8.0,
+            'DA_K_positive': 10.0,
             'DA_K_negative': 1.0
         })
-        
-#        # Reward information from BLA to NAcc
-#        proj = self.connect(all2all(pre="BLA", post="NAcc", connection_type="exc",
-#                                    value=0.0, var_value=0.0,  delay=0),
-#                            learning_rule=DA_Covariance)
-#        proj.set_learning_parameters({
-#            'tau': 100.0,
-#            'K_LTD': 1.0,
-#            'min_value': 0.0,
-#            'K_alpha': 5.0,
-#            'tau_alpha': 10.0,
-#            'tau_dopa': 50.0,
-#            'regularization_threshold': 0.8,
-#            'DA_threshold_positive': 0.6,
-#            'DA_threshold_negative': 0.1,
-#            'DA_K_positive': 4.0,
-#            'DA_K_negative': 1.0
-#        })
-        
 
         # Inhibitory projection from NAcc to VP
         proj = self.connect(all2all(pre="NAcc", post="VP", connection_type="inh",
@@ -481,35 +463,35 @@ class TimingNetwork(Network):
         })
         
         
-        #######################
-        # OFC representation of incentive value
-        #######################
-        
-        # Dopaminergic modulation of OFC
-        self.connect(all2all(pre="VTA", post="OFC", connection_type="dopa",
-                             value=1.0, delay=0))
-                                     
-        # Visual input to OFC
-        proj = self.connect(all2all(pre="IT", post="OFC", connection_type="mod",
-                            value=0.0, delay=0),
-                    learning_rule=DA_Copy )
-        proj.set_learning_parameters({
-            'tau': 500.0,
-            'min_value': 0.0,
-            'K_alpha': 1.0,
-            'K_LTD': 1.0,
-            'tau_alpha': 1.0,
-            'tau_dopa': 300.0,
-            'regularization_threshold': 1.0,
-            'DA_threshold_positive': 0.4,
-            'DA_threshold_negative': 0.1,
-            'DA_K_positive': 10.0,
-            'DA_K_negative': 1.0
-        })
-        
-        # BLA input to OFC
-        proj = self.connect(one2one(pre="BLA", post="OFC", connection_type="exc",
-                                    value=1.0, var_value= 0.0, delay=0) )
+#        #######################
+#        # OFC representation of incentive value
+#        #######################
+#        
+#        # Dopaminergic modulation of OFC
+#        self.connect(all2all(pre="VTA", post="OFC", connection_type="dopa",
+#                             value=1.0, delay=0))
+#                                     
+#        # Visual input to OFC
+#        proj = self.connect(all2all(pre="IT", post="OFC", connection_type="mod",
+#                            value=0.0, delay=0),
+#                    learning_rule=DA_Copy )
+#        proj.set_learning_parameters({
+#            'tau': 500.0,
+#            'min_value': 0.0,
+#            'K_alpha': 1.0,
+#            'K_LTD': 1.0,
+#            'tau_alpha': 1.0,
+#            'tau_dopa': 300.0,
+#            'regularization_threshold': 1.0,
+#            'DA_threshold_positive': 0.4,
+#            'DA_threshold_negative': 0.1,
+#            'DA_K_positive': 10.0,
+#            'DA_K_negative': 1.0
+#        })
+#        
+#        # BLA input to OFC
+#        proj = self.connect(one2one(pre="BLA", post="OFC", connection_type="exc",
+#                                    value=1.0, var_value= 0.0, delay=0) )
 
 #######################
 # Methods for learning
@@ -534,13 +516,16 @@ US_duration = 1000
 sooner_duration = 1000
 
 # Habituate the network to gustatory inputs
-def valuation_trial(net, US):
+def valuation_trial(net, US=None, stimulus=None):
     # Reset the network for 500ms
     for neur in net.population('GUS'):
         neur.baseline = 0.0
     net.execute(500)
     # Select the US 
-    GUS = CS_US[str(US)]['vector']
+    if US: # US integer is provided
+        GUS = CS_US[str(US)]['vector']
+    else: # use defined stimulus
+        GUS = stimulus['vector']
     print 'Valuation: ', GUS
     # Let the network learn for 1s
     net.population('GUS').set_variables({'baseline': GUS})
@@ -551,7 +536,7 @@ def valuation_trial(net, US):
     net.execute(500)
 
 # Perform timed conditioning
-def conditioning_trial(net, CS=None):
+def conditioning_trial(net, CS=None, stimulus=None):
     # Reset for 1s
     for neur in net.population('VIS'):
         neur.baseline = 0.0
@@ -560,12 +545,18 @@ def conditioning_trial(net, CS=None):
     net.execute(1000)
     # Select the CS 
     VIS =np.zeros(net.nb_visual_inputs)
-    VIS[CS_US[str(CS)]['visual']] = 1.0
-    GUS = [CS_US[str(CS)]['magnitude']* i for i in CS_US[str(CS)]['vector'] ]
+    if CS: # integer
+        VIS[CS_US[str(CS)]['visual']] = 1.0
+        GUS = [CS_US[str(CS)]['magnitude']* i for i in CS_US[str(CS)]['vector'] ]
+        duration = CS_US[str(CS)]['duration']
+    else: # hand-crafted stimulus
+        VIS[stimulus['visual']] = 1.0
+        GUS = [stimulus['magnitude']* i for i in stimulus['vector'] ]
+        duration = stimulus['duration']
     print 'Conditioning: ', VIS, GUS
     # Present CS1 for 2s, CS2 for 3s
     net.population('VIS').set_variables({'baseline': VIS})
-    net.execute(CS_US[str(CS)]['duration'])
+    net.execute(duration)
     # Present the US for 1s
     net.population('GUS').set_variables({'baseline': GUS})
     net.execute(US_duration)
@@ -577,7 +568,7 @@ def conditioning_trial(net, CS=None):
     net.execute(1000)
 
 # Extinction
-def extinction_trial(net, CS=None):
+def extinction_trial(net, CS=None, stimulus=None):
     # Reset for 1s
     for neur in net.population('VIS'):
         neur.baseline = 0.0
@@ -585,13 +576,19 @@ def extinction_trial(net, CS=None):
         neur.baseline = 0.0
     net.execute(1000)
     # Select the CS 
-    GUS = [0.0, 0.0, 0.0, 0.0]
     VIS =np.zeros(net.nb_visual_inputs)
-    VIS[CS_US[str(CS)]['visual']] = 1.0
+    if CS: # integer
+        VIS[CS_US[str(CS)]['visual']] = 1.0
+        GUS = [CS_US[str(CS)]['magnitude']* i for i in CS_US[str(CS)]['vector'] ]
+        duration = CS_US[str(CS)]['duration']
+    else: # hand-crafted stimulus
+        VIS[stimulus['visual']] = 1.0
+        GUS = [stimulus['magnitude']* i for i in stimulus['vector'] ]
+        duration = stimulus['duration']
     print 'Extinction: ', VIS, GUS
     # Present CS1 for 2s, CS2 for 3s
     net.population('VIS').set_variables({'baseline': VIS})
-    net.execute(CS_US[str(CS)]['duration'])
+    net.execute(duration)
     # DO NOT Present the US for 1s
     #net.population('GUS').set_variables({'baseline': GUS})
     net.execute(US_duration)
@@ -603,7 +600,7 @@ def extinction_trial(net, CS=None):
     net.execute(1000)
 
 # Reward is delivered sooner than expected
-def sooner_trial(net, CS=None):
+def sooner_trial(net, CS=None, stimulus=None):
     # Reset for 1s
     for neur in net.population('VIS'):
         neur.baseline = 0.0
@@ -612,12 +609,18 @@ def sooner_trial(net, CS=None):
     net.execute(1000)
     # Select the CS 
     VIS =np.zeros(net.nb_visual_inputs)
-    VIS[CS_US[str(CS)]['visual']] = 1.0
-    GUS = [CS_US[str(CS)]['magnitude']* i for i in CS_US[str(CS)]['vector'] ]
+    if CS: # integer
+        VIS[CS_US[str(CS)]['visual']] = 1.0
+        GUS = [CS_US[str(CS)]['magnitude']* i for i in CS_US[str(CS)]['vector'] ]
+        duration = CS_US[str(CS)]['duration']
+    else: # hand-crafted stimulus
+        VIS[stimulus['visual']] = 1.0
+        GUS = [stimulus['magnitude']* i for i in stimulus['vector'] ]
+        duration = stimulus['duration']
     print 'Sooner reward: ', VIS, GUS
     # Present CS1 for 1s, CS2 for 2s: sooner than what was learned
     net.population('VIS').set_variables({'baseline': VIS})
-    net.execute(CS_US[str(CS)]['duration'] - sooner_duration)
+    net.execute(duration - sooner_duration)
     # Present the US for 1s
     net.population('GUS').set_variables({'baseline': GUS})
     net.execute(US_duration)
