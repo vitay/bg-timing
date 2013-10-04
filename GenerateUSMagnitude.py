@@ -42,7 +42,7 @@ def run_simulation(nb_magnitude=10, nb_valuation = 10, nb_conditioning = 10, nb_
         # Define the association
         stim = {'visual': 0,
                 'vector': [1.0, 1.0, 0.0, 0.0],
-                'magnitude': (magnitude+1)/float(nb_magnitude),
+                'magnitude': (magnitude)/float(nb_magnitude-1),
                 'duration': 2000 }
     
         # Habituate the network to the gustatory inputs
@@ -74,7 +74,7 @@ def run_simulation(nb_magnitude=10, nb_valuation = 10, nb_conditioning = 10, nb_
                   'last': last_trials}
     cPickle.dump(recordings, open('recordings_multiple.data', 'w')) 
     
-def plot_evolution(nb_magnitude=10):
+def plot_evolution(nb_magnitude=11):
 
     def analyse_results(data, pop):
         CS=[]; US=[]
@@ -89,11 +89,12 @@ def plot_evolution(nb_magnitude=10):
     
     
     fig, axes = plt.subplots(nrows=1, ncols=1)
-    axes.set_ylim((0., 1.3))
-    axes.plot(range(nb_magnitude), before_CS, label='CS, trial #1')
-    axes.plot(range(nb_magnitude), before_US, label='US, trial #1')
-    axes.plot(range(nb_magnitude), after_CS, label='CS, trial #10')
-    axes.plot(range(nb_magnitude), after_US, label='US, trial #10')
+    axes.set_ylim((0., 1.2))
+    xes = np.arange(nb_magnitude)/float(nb_magnitude-1)
+    axes.plot(xes, before_CS, label='CS, trial #1')
+    axes.plot(xes, before_US, label='US, trial #1')
+    axes.plot(xes, after_CS, label='CS, trial #10')
+    axes.plot(xes, after_US, label='US, trial #10')
     l = axes.legend(loc=2)
     l.draw_frame(False) 
     
@@ -111,7 +112,7 @@ if __name__=='__main__':
     
     if learn_network:
         # Run the simulation
-        run_simulation(nb_magnitude=10)
+        run_simulation(nb_magnitude=11)
     else: # Retrieve saved data
         net = load('net.zip')
         recordings = cPickle.load(open('recordings_multiple.data', 'r')) 
@@ -122,4 +123,4 @@ if __name__=='__main__':
     ### Analyse the recordings
     #############################
     
-    plot_evolution()
+    plot_evolution(nb_magnitude=11)

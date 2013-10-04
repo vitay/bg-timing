@@ -373,7 +373,7 @@ class TimingNetwork(Network):
                                     value=0.0, delay=0),
                             learning_rule=DA_Copy )
         proj.set_learning_parameters({
-            'tau': 5000.0,
+            'tau': 2000.0,
             'min_value': 0.0,
             #'K_alpha': 1.0,
             'K_LTD': 5.0,
@@ -382,7 +382,7 @@ class TimingNetwork(Network):
             #'regularization_threshold': 1.0,
             'DA_threshold_positive': 0.3,
             'DA_threshold_negative': 0.1,
-            'DA_K_positive': 10.0,
+            'DA_K_positive': 4.0,
             'DA_K_negative': 1.0
         })
 
@@ -429,7 +429,7 @@ class TimingNetwork(Network):
         # Timing information from vmPFC to NAcc
         proj = self.connect(all2all(pre="vmPFC", post="NAcc", connection_type="mod",
                                     value=0.0, var_value=0.0,  delay=0),
-                            learning_rule=CorticoStriatal)
+                            learning_rule=DA_Covariance)
         proj.set_learning_parameters({
             'tau': 100.0,
             'K_LTD': 10.0,
@@ -440,7 +440,7 @@ class TimingNetwork(Network):
             'regularization_threshold': 1.0,
             'DA_threshold_positive': 0.3,
             'DA_threshold_negative': 0.1,
-            'DA_K_positive': 0.5,
+            'DA_K_positive': 5.0,
             'DA_K_negative': 1.0
         })
 
