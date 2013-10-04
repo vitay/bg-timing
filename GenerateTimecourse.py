@@ -160,7 +160,8 @@ def plot_vta_peaks(nb_stim=2):
         title = "CS%(rk)s - US%(rk)s" % {'rk': str(stim+1) }
         ax.set_title(title)
         ax.set_xlabel('Number of Trials')
-        ax.set_ylabel('Amplitude of VTA bursts')
+        if stim == 0:
+            ax.set_ylabel('Amplitude of VTA bursts')
         ax.plot(CS[stim], color='green', label='CS')
         ax.plot(US[stim], color='red', label='US')
     
@@ -181,7 +182,7 @@ def plot_bla(nb_stim=2):
         ax.plot(np.max(np.array(data['BLA']['rate']), axis=0), color='black', label='BLA max')
 
     print 'Generate BLA plot'
-    fig, axes = plt.subplots(nrows=3, ncols=nb_stim)
+    fig, axes = plt.subplots(nrows=2, ncols=nb_stim)
 
     for stim in range(nb_stim):
         title = "CS%(rk)s - US%(rk)s" % {'rk': str(stim+1) }

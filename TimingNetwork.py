@@ -14,6 +14,7 @@ compiler.neurons = ['LinearNeuron',
                     'StriatalNeuron',
                     'ShuntingExcitationNeuron']
 compiler.learning_rules = ['DA_Covariance',
+                           'CorticoStriatal',
                            'DA_Copy',
                            'AntiHebb',
                            'Hebb']
@@ -206,8 +207,8 @@ class TimingNetwork(Network):
             'threshold_up': 0.1,
             'threshold_down': 0.6,
             'tau_state': 400.0,
-            'threshold_exc': 0.8,
-            'threshold_dopa': 0.5
+            'threshold_exc': 0.9,
+            'threshold_dopa': 0.4
         })
         self.population("NAcc").set_variables({
             'baseline': -0.3
@@ -420,10 +421,15 @@ class TimingNetwork(Network):
             'max_value': 1.0
         })
 
+
+        # BLA -> NAcc
+        proj = self.connect(one2one(pre="BLA", post="NAcc", connection_type="exc",
+                             value=0.2, delay=0))
+
         # Timing information from vmPFC to NAcc
         proj = self.connect(all2all(pre="vmPFC", post="NAcc", connection_type="mod",
                                     value=0.0, var_value=0.0,  delay=0),
-                            learning_rule=DA_Covariance)
+                            learning_rule=CorticoStriatal)
         proj.set_learning_parameters({
             'tau': 20.0,
             'K_LTD': 10.0,
@@ -434,7 +440,7 @@ class TimingNetwork(Network):
             'regularization_threshold': 1.0,
             'DA_threshold_positive': 0.3,
             'DA_threshold_negative': 0.1,
-            'DA_K_positive': 8.0,
+            'DA_K_positive': 0.5,
             'DA_K_negative': 1.0
         })
 
@@ -501,15 +507,15 @@ class TimingNetwork(Network):
 CS_US = { '1': {'visual': 0,
                 'vector': [1.0, 1.0, 0.0, 0.0],
                 'magnitude': 0.8,
-                'duration': 3000 },
+                'duration': 2000 },
           '2': {'visual': 1,
                 'vector': [1.0, 0.0, 1.0, 0.0],
                 'magnitude': 0.5,
-                'duration': 4000 },
+                'duration': 3000 },
           '3': {'visual': 2,
                 'vector': [0.0, 0.0, 1.0, 1.0],
                 'magnitude': 1.0,
-                'duration': 5000 }
+                'duration': 4000 }
         }
               
 US_duration = 1000
