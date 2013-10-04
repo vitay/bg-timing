@@ -1,5 +1,5 @@
 ################################################################
-### Script to generate all figures in the article
+### Script to generate all figures with three CS-US
 ################################################################
 
 from TimingNetwork import *
@@ -23,16 +23,14 @@ conditioning_trials = []
 extinction_trials = []
 sooner_trials = []
 
-## Tune matplotlib
-#if save_figures:
-#    matplotlib.rcParams.update({'font.size': 8})
     
 def save_figure(fig, name, width=2, ratio=0.75):
+    matplotlib.rcParams.update({'font.size': 8})
     w = int(float(width) * 90./25.4)
     fig.set_dpi(900)
     fig.set_size_inches((w, w*ratio))
-    fig.savefig('figs/'+name+'.svg')
-    fig.savefig('figs/'+name+'.eps')
+#    fig.savefig('figs/'+name+'.svg')
+#    fig.savefig('figs/'+name+'.eps')
     fig.savefig('figs/'+name+'.jpg', dpi=900)
 
 
@@ -91,7 +89,7 @@ def plot_vta(nb_stim=2):
         ticks = np.linspace(0, duration, int(duration/1000)+1)
         ax.set_ylim((0., 1.2))
         ax.set_xticks(ticks) 
-        ax.set_xticklabels(ticks/1000.) 
+        ax.set_xticklabels([ int(i) for i in ticks/1000.]) 
         ax.set_yticks([0.0, 0.25, 0.5, 0.75, 1.0])
 #        ax.axis["right"].set_visible(False)
 #        ax.axis["top"].set_visible(False)
@@ -176,6 +174,10 @@ def plot_bla(nb_stim=2):
     "Shows activity of the BLA cells during conditioning."
     def single_plot(data, ax):
         ax.set_ylim((0., 1.2))
+        duration = data['duration']
+        ticks = np.linspace(0, duration, int(duration/1000)+1)
+        ax.set_xticks(ticks) 
+        ax.set_xticklabels([ int(i) for i in ticks/1000.]) 
         ax.plot(np.max(np.array(data['BLA']['rate']), axis=0), color='black', label='BLA max')
 
     print 'Generate BLA plot'
@@ -194,10 +196,10 @@ def plot_bla(nb_stim=2):
             ax.set_ylabel('Trial 10')
         single_plot(conditioning_trials[9*nb_stim + stim], ax)
 
-        ax = axes[2, stim]
-        if stim == 0:
-            ax.set_ylabel('Population activity')
-        ax.imshow(np.array(conditioning_trials[9*nb_stim + stim]['BLA']['rate']), aspect='auto')
+#        ax = axes[2, stim]
+#        if stim == 0:
+#            ax.set_ylabel('Population activity')
+#        ax.imshow(np.array(conditioning_trials[9*nb_stim + stim]['vmPFC']['rate']), aspect='auto')
     
     if save_figures:
         save_figure(fig, 'BLA_activity', width=2)
@@ -209,6 +211,10 @@ def plot_nacc(nb_stim=2):
     "Shows activity of the NAcc cells during conditioning."
     def single_plot(data, ax):
         ax.set_ylim((0., 1.2))
+        duration = data['duration']
+        ticks = np.linspace(0, duration, int(duration/1000)+1)
+        ax.set_xticks(ticks) 
+        ax.set_xticklabels([ int(i) for i in ticks/1000.])         
         ax.plot(np.max(np.array(data['NAcc']['rate']), axis=0), color='black', label='NAcc max')
 
     print 'Generate NAcc plot'

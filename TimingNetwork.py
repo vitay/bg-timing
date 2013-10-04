@@ -237,10 +237,10 @@ class TimingNetwork(Network):
             'tau_modulation': 300.0,
             'noise': self.noise,
             'threshold': 0.0,
-            'max_rate': 1.1
+            'max_rate': 1.2
         })
         self.population("VTA").set_variables({
-            'baseline': 0.3
+            'baseline': 0.2
         })
 
 
@@ -306,10 +306,10 @@ class TimingNetwork(Network):
 
         # CE -> PPTN, exc
         self.connect(all2all(pre="CE", post="PPTN", connection_type="exc",
-                             value=2.0, delay=0) )
+                             value=1.5, delay=0) )
         # PPTN -> VTA, exc
         self.connect(all2all(pre="PPTN", post="VTA", connection_type="exc",
-                             value=1.0, delay=0) )
+                             value=1.5, delay=0) )
 
         # PPTN -> VP, exc
         self.connect(all2all(pre="PPTN", post="VP", connection_type="exc",
@@ -361,7 +361,7 @@ class TimingNetwork(Network):
             'tau_dopa': 300.0,
             'tau_alpha': 1.0,
             'regularization_threshold': 1.0,
-            'DA_threshold_positive': 0.4,
+            'DA_threshold_positive': 0.3,
             'DA_threshold_negative': 0.1,
             'DA_K_positive': 10.0,
             'DA_K_negative': 0.0
@@ -379,7 +379,7 @@ class TimingNetwork(Network):
             #'tau_alpha': 1.0,
             'tau_dopa': 300.0,
             #'regularization_threshold': 1.0,
-            'DA_threshold_positive': 0.4,
+            'DA_threshold_positive': 0.3,
             'DA_threshold_negative': 0.1,
             'DA_K_positive': 10.0,
             'DA_K_negative': 1.0
@@ -432,9 +432,9 @@ class TimingNetwork(Network):
             'tau_alpha': 10.0,
             'tau_dopa': 10.0,
             'regularization_threshold': 1.0,
-            'DA_threshold_positive': 0.4,
+            'DA_threshold_positive': 0.3,
             'DA_threshold_negative': 0.1,
-            'DA_K_positive': 10.0,
+            'DA_K_positive': 8.0,
             'DA_K_negative': 1.0
         })
 
