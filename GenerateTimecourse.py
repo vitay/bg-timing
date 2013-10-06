@@ -17,7 +17,7 @@ learn_network = True # Do not relearn the task
 save_figures = True # Save the the figures or display them
 
 # Recorded data
-recorded_areas = ['BLA', 'VTA', 'NAcc']
+recorded_areas = ['BLA', 'VTA']
 valuation_trials = []
 conditioning_trials = []
 extinction_trials = []
@@ -33,7 +33,8 @@ def save_figure(fig, name, width=2, ratio=0.75):
 #    fig.savefig('figs/'+name+'.eps')
     fig.savefig('figs/'+name+'.jpg', dpi=900, bbox_inches="tight")
 
-
+def find_max_cell(data):
+    return np.argmax(np.mean(data, axis=1))
 
 def run_simulation(nb_stim=2, nb_valuation = 10, nb_conditioning = 10, nb_extinction = 1, nb_sooner = 1):
     "Trains the network on the conditioning task"
@@ -159,11 +160,11 @@ def plot_vta_peaks(nb_stim=2):
         ax.set_ylim((0., 1.2))
         title = "CS%(rk)s - US%(rk)s" % {'rk': str(stim+1) }
         ax.set_title(title)
-        ax.set_xlabel('Number of Trials')
+        ax.set_xlabel('Trial')
         if stim == 0:
             ax.set_ylabel('Amplitude of VTA bursts')
-        ax.plot(CS[stim], color='green', label='CS')
-        ax.plot(US[stim], color='red', label='US')
+        ax.plot(np.arange(len(CS[stim]))+1, CS[stim], color='green', label='CS')
+        ax.plot(np.arange(len(US[stim]))+1, US[stim], color='red', label='US')
     
     if save_figures:
         save_figure(fig, 'VTA_peaks', width=2, ratio=0.4)
@@ -179,7 +180,8 @@ def plot_bla(nb_stim=2):
         ticks = np.linspace(0, duration, int(duration/1000)+1)
         ax.set_xticks(ticks) 
         ax.set_xticklabels([ int(i) for i in ticks/1000.]) 
-        ax.plot(np.max(np.array(data['BLA']['rate']), axis=0), color='black', label='BLA max', lw=0.5)
+        cell = find_max_cell(np.array(data['BLA']['rate']))
+        ax.plot(np.array(data['BLA']['rate'])[cell], color='black', label='BLA max', lw=0.5)
 
     print 'Generate BLA plot'
     fig, axes = plt.subplots(nrows=2, ncols=nb_stim, sharex=False, sharey=True)
@@ -208,38 +210,7 @@ def plot_bla(nb_stim=2):
     else:
         plt.show()
     plt.close()
-    
-def plot_nacc(nb_stim=2):
-    "Shows activity of the NAcc cells during conditioning."
-    def single_plot(data, ax):
-        ax.set_ylim((0., 1.2))
-        duration = data['duration']
-        ticks = np.linspace(0, duration, int(duration/1000)+1)
-        ax.set_xticks(ticks) 
-        ax.set_xticklabels([ int(i) for i in ticks/1000.])         
-        ax.plot(np.max(np.array(data['NAcc']['rate']), axis=0), color='black', label='NAcc max')
 
-    print 'Generate NAcc plot'
-    fig, axes = plt.subplots(nrows=2, ncols=nb_stim)
-
-    for stim in range(nb_stim):
-        title = "CS%(rk)s - US%(rk)s" % {'rk': str(stim+1) }
-        ax = axes[0, stim]
-        ax.set_title(title)
-        if stim == 0:
-            ax.set_ylabel('Trial 1')
-        single_plot(conditioning_trials[stim], ax)        
-
-        ax = axes[1, stim]
-        if stim == 0:
-            ax.set_ylabel('Trial 10')
-        single_plot(conditioning_trials[9*nb_stim + stim], ax)
-    
-    if save_figures:
-        save_figure(fig, 'NAcc_activity', width=2, ratio=0.6)
-    else:
-        plt.show()
-    plt.close()
     
 if __name__=='__main__':
 
@@ -267,9 +238,6 @@ if __name__=='__main__':
     
     # BLA activation
     plot_bla(nb_stim)
-    
-    # NAcc activation
-    plot_nacc(nb_stim)
     
     # Evolution of CS and US-related firing
     plot_vta_peaks(nb_stim)

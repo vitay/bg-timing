@@ -117,19 +117,19 @@ class TimingNetwork(Network):
             'noise': self.noise
         })
 
-        # OFC for representation of incentive value
-        self.add(name="OFC", width=self.nb_bla, height=self.nb_bla,
-                 neuron=ModulatedPhasicNeuron)
-        self.population("OFC").set_parameters({
-            'tau': 10.0,
-            'noise': self.noise,
-            'fb_mod': 0.0,
-            'fb_exc': 1.0,
-            'tau_adaptation': 50000.0
-        })
-        self.population("OFC").set_variables({
-            'baseline': 0.0
-        })
+#        # OFC for representation of incentive value
+#        self.add(name="OFC", width=self.nb_bla, height=self.nb_bla,
+#                 neuron=ModulatedPhasicNeuron)
+#        self.population("OFC").set_parameters({
+#            'tau': 10.0,
+#            'noise': self.noise,
+#            'fb_mod': 0.0,
+#            'fb_exc': 1.0,
+#            'tau_adaptation': 50000.0
+#        })
+#        self.population("OFC").set_variables({
+#            'baseline': 0.0
+#        })
         
         
         # Ventromedial prefrontal cortex for the oscillations
@@ -204,14 +204,14 @@ class TimingNetwork(Network):
         self.population("NAcc").set_parameters({
             'tau': 10.0,
             'noise': self.noise,
-            'threshold_up': 0.0,
-            'threshold_down': 0.5,
+            'threshold': 0.0,
+            'membrane_up': 0.5,
             'tau_state': 400.0,
             'threshold_exc': 1.0,
             'threshold_dopa': 0.4
         })
         self.population("NAcc").set_variables({
-            'baseline': -0.4
+            'baseline': -0.9
         })
         
         # Ventral Pallidum

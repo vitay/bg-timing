@@ -67,8 +67,6 @@ def run_simulation(nb_magnitude=10, nb_valuation = 10, nb_conditioning = 10, nb_
         last_trials.append(net.get_recordings())
         net.stop_recording()        
                 
-            
-        
     # Save recordings
     recordings = {'first': first_trials,
                   'last': last_trials}
