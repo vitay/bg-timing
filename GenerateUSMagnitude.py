@@ -14,7 +14,7 @@ learn_network = True # Do not relearn the task
 save_figures = True # Save the the figures or display them
 
 # Recorded data
-recorded_areas = ['BLA', 'VTA', 'PPTN', 'LHb', 'RMTg', 'VP']
+recorded_areas = ['BLA', 'VTA']
 first_trials = []
 last_trials = []
 
@@ -26,11 +26,11 @@ def save_figure(fig, name, width=2, ratio=0.75):
     fig.set_size_inches((w, w*ratio))
 #    fig.savefig('figs/'+name+'.svg')
 #    fig.savefig('figs/'+name+'.eps')
-    fig.savefig('figs/'+name+'.jpg', dpi=900)
+    fig.savefig('figs/'+name+'.jpg', bbox_inches="tight")
 
 
 
-def run_simulation(nb_magnitude=10, nb_valuation = 10, nb_conditioning = 10, nb_extinction = 1, nb_sooner = 1):
+def run_simulation(nb_magnitude=10, nb_valuation = 10, nb_conditioning = 10, nb_extinction = 1, nb_sooner = 1, record=None):
     "Trains the network on the conditioning task for different US magnitudes"
     
     for magnitude in range(nb_magnitude):
@@ -54,7 +54,7 @@ def run_simulation(nb_magnitude=10, nb_valuation = 10, nb_conditioning = 10, nb_
 
         # Start the conditioning phase
         # Record the first trial
-        net.record(recorded_areas)
+        net.record(record)
         conditioning_trial(net, stimulus=stim)
         first_trials.append(net.get_recordings())
         net.stop_recording()
@@ -62,7 +62,7 @@ def run_simulation(nb_magnitude=10, nb_valuation = 10, nb_conditioning = 10, nb_
         for trial in range(nb_conditioning-2):
             conditioning_trial(net, stimulus=stim) 
         # Record the last trial
-        net.record(recorded_areas)
+        net.record(record)
         conditioning_trial(net, stimulus=stim)
         last_trials.append(net.get_recordings())
         net.stop_recording()        
@@ -76,30 +76,53 @@ def run_simulation(nb_magnitude=10, nb_valuation = 10, nb_conditioning = 10, nb_
     
 def plot_evolution(nb_magnitude=11):
 
-    def analyse_results(data, pop):
+    def analyse_vta(data, pop):
         CS=[]; US=[]
         for rec in data:
             vals = np.array(rec[pop]['rate'][0])
             CS.append(np.max(vals[900:1100]))
             US.append(np.max(vals[2900:3100]))
         return CS, US
+
+    def analyse_bla(data, pop):
+        CS=[]; US=[]
+        for rec in data:
+            vals = np.max(np.array(rec[pop]['rate']), axis=0)
+            CS.append(np.max(vals[900:1100]))
+            US.append(np.max(vals[2900:3100]))
+        return CS, US
     
-    before_CS, before_US = analyse_results(first_trials, 'VTA')
-    after_CS, after_US = analyse_results(last_trials, 'VTA')
+    vta_before_CS, vta_before_US = analyse_vta(first_trials, 'VTA')
+    vta_after_CS, vta_after_US = analyse_vta(last_trials, 'VTA')
+    
+    bla_before_CS, bla_before_US = analyse_bla(first_trials, 'BLA')
+    bla_after_CS, bla_after_US = analyse_bla(last_trials, 'BLA')
     
     
-    fig, axes = plt.subplots(nrows=1, ncols=1)
-    axes.set_ylim((0., 1.2))
+    fig, axes = plt.subplots(nrows=1, ncols=2)
+    
+    ax = axes[0]
+    ax.set_ylim((0., 1.2))
     xes = np.arange(nb_magnitude)/float(nb_magnitude-1)
-    axes.plot(xes, before_CS, label='CS, trial #1')
-    axes.plot(xes, before_US, label='US, trial #1')
-    axes.plot(xes, after_CS, label='CS, trial #10')
-    axes.plot(xes, after_US, label='US, trial #10')
-    l = axes.legend(loc=2)
-    l.draw_frame(False) 
+    ax.plot(xes, vta_before_CS, color='red', label='CS, trial #1')
+    ax.plot(xes, vta_before_US, color='green', label='US, trial #1')
+    ax.plot(xes, vta_after_CS, color='blue', label='CS, trial #10')
+    ax.plot(xes, vta_after_US, color='brown', label='US, trial #10')
+    ax.set_xlabel('Reward magnitude')
+    ax.set_ylabel('Amplitude of VTA bursts')
+    
+    ax = axes[1]
+    ax.set_ylim((0., 1.35))
+    xes = np.arange(nb_magnitude)/float(nb_magnitude-1)
+    ax.plot(xes, bla_before_CS, color='red', label='CS, trial #1')
+    ax.plot(xes, bla_before_US, color='green', label='US, trial #1')
+    ax.plot(xes, bla_after_CS, color='blue', label='CS, trial #10')
+    ax.plot(xes, bla_after_US, color='brown', label='US, trial #10')
+    ax.set_xlabel('Reward magnitude')
+    ax.set_ylabel('Maximal activity in BLA')
     
     if save_figures:
-        save_figure(fig, 'VTA_evolution', width=2)
+        save_figure(fig, 'VTA_evolution', width=2, ratio=0.5)
     else:
         plt.show()
     plt.close()
@@ -112,7 +135,7 @@ if __name__=='__main__':
     
     if learn_network:
         # Run the simulation
-        run_simulation(nb_magnitude=11)
+        run_simulation(nb_magnitude=11, record=recorded_areas)
     else: # Retrieve saved data
         net = load('net.zip')
         recordings = cPickle.load(open('recordings_multiple.data', 'r')) 

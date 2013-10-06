@@ -202,7 +202,7 @@ class TimingNetwork(Network):
         self.add(name="NAcc", width=self.nb_nacc, height=self.nb_nacc,
                  neuron=StriatalNeuron)
         self.population("NAcc").set_parameters({
-            'tau': 5.0,
+            'tau': 10.0,
             'noise': self.noise,
             'threshold_up': 0.1,
             'threshold_down': 0.6,

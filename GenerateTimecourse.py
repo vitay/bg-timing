@@ -31,7 +31,7 @@ def save_figure(fig, name, width=2, ratio=0.75):
     fig.set_size_inches((w, w*ratio))
 #    fig.savefig('figs/'+name+'.svg')
 #    fig.savefig('figs/'+name+'.eps')
-    fig.savefig('figs/'+name+'.jpg', dpi=900)
+    fig.savefig('figs/'+name+'.jpg', bbox_inches="tight")
 
 
 
@@ -132,7 +132,7 @@ def plot_vta(nb_stim=2):
 
     
     if save_figures:
-        save_figure(fig, 'VTA_activity', width=2)
+        save_figure(fig, 'VTA_activity', width=2, ratio=0.65)
     else:
         plt.show()
     plt.close()
@@ -166,7 +166,7 @@ def plot_vta_peaks(nb_stim=2):
         ax.plot(US[stim], color='red', label='US')
     
     if save_figures:
-        save_figure(fig, 'VTA_peaks', width=2)
+        save_figure(fig, 'VTA_peaks', width=2, ratio=0.5)
     else:
         plt.show()
     plt.close()
@@ -174,15 +174,15 @@ def plot_vta_peaks(nb_stim=2):
 def plot_bla(nb_stim=2):
     "Shows activity of the BLA cells during conditioning."
     def single_plot(data, ax):
-        ax.set_ylim((0., 1.2))
+        ax.set_ylim((0., 1.3))
         duration = data['duration']
         ticks = np.linspace(0, duration, int(duration/1000)+1)
         ax.set_xticks(ticks) 
         ax.set_xticklabels([ int(i) for i in ticks/1000.]) 
-        ax.plot(np.max(np.array(data['BLA']['rate']), axis=0), color='black', label='BLA max')
+        ax.plot(np.max(np.array(data['BLA']['rate']), axis=0), color='black', label='BLA max', lw=0.5)
 
     print 'Generate BLA plot'
-    fig, axes = plt.subplots(nrows=2, ncols=nb_stim)
+    fig, axes = plt.subplots(nrows=2, ncols=nb_stim, sharex=False, sharey=True)
 
     for stim in range(nb_stim):
         title = "CS%(rk)s - US%(rk)s" % {'rk': str(stim+1) }
@@ -195,6 +195,7 @@ def plot_bla(nb_stim=2):
         ax = axes[1, stim]
         if stim == 0:
             ax.set_ylabel('Trial 10')
+        ax.set_xlabel('Time (s)')
         single_plot(conditioning_trials[9*nb_stim + stim], ax)
 
 #        ax = axes[2, stim]
@@ -203,7 +204,7 @@ def plot_bla(nb_stim=2):
 #        ax.imshow(np.array(conditioning_trials[9*nb_stim + stim]['vmPFC']['rate']), aspect='auto')
     
     if save_figures:
-        save_figure(fig, 'BLA_activity', width=2)
+        save_figure(fig, 'BLA_activity', width=2, ratio=0.6)
     else:
         plt.show()
     plt.close()
@@ -235,7 +236,7 @@ def plot_nacc(nb_stim=2):
         single_plot(conditioning_trials[9*nb_stim + stim], ax)
     
     if save_figures:
-        save_figure(fig, 'NAcc_activity', width=2)
+        save_figure(fig, 'NAcc_activity', width=2, ratio=0.6)
     else:
         plt.show()
     plt.close()
