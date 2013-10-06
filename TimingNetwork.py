@@ -314,7 +314,7 @@ class TimingNetwork(Network):
 
         # PPTN -> VP, exc
         self.connect(all2all(pre="PPTN", post="VP", connection_type="exc",
-                             value=0.2, delay=0))
+                             value=0.5, delay=0))
         # VP -> RMTg, inh
         self.connect(all2all(pre="VP", post="RMTg", connection_type="inh",
                              value=1.0, delay=0))
@@ -446,12 +446,12 @@ class TimingNetwork(Network):
 
         # Inhibitory projection from NAcc to VP
         proj = self.connect(all2all(pre="NAcc", post="VP", connection_type="inh",
-                                    value=0.1, var_value=0.0, delay=0),
+                                    value=0.0, var_value=0.0, delay=0),
                             learning_rule=Hebb)
         proj.set_learning_parameters({
-            'tau': 20.0,
+            'tau': 150.0,
             'min_value': 0.0,
-            'max_value': 1.0,
+            'max_value': 2.0,
             'threshold_pre' : 0.0,
             'threshold_post' : 0.5,
         })
