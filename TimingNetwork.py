@@ -204,14 +204,14 @@ class TimingNetwork(Network):
         self.population("NAcc").set_parameters({
             'tau': 10.0,
             'noise': self.noise,
-            'threshold_up': 0.1,
-            'threshold_down': 0.6,
+            'threshold_up': 0.0,
+            'threshold_down': 0.5,
             'tau_state': 400.0,
-            'threshold_exc': 0.9,
+            'threshold_exc': 1.0,
             'threshold_dopa': 0.4
         })
         self.population("NAcc").set_variables({
-            'baseline': -0.3
+            'baseline': -0.4
         })
         
         # Ventral Pallidum
@@ -388,11 +388,11 @@ class TimingNetwork(Network):
 
         # Competition in BLA, inh
         proj = self.connect(all2all(pre="BLA", post="BLA", connection_type="inh",
-                                    value=0.6, var_value= 0.0, delay=0),
+                                    value=0.5, var_value= 0.0, delay=0),
                             learning_rule=AntiHebb )
         proj.set_learning_parameters({
             'tau': 100.0,
-            'theta': 0.001,
+            'theta': 0.00,
             'min_value': 0.0,
             'max_value': 3.0
         })
@@ -412,11 +412,11 @@ class TimingNetwork(Network):
 
         # Competition in NAcc
         proj = self.connect(all2all(pre="NAcc", post="NAcc", connection_type="inh",
-                             value=0.6, delay=0),
+                             value=0.5, delay=0),
                              learning_rule=AntiHebb )
         proj.set_learning_parameters({
             'tau': 1000.0,
-            'theta': 0.01,
+            'theta': 0.0,
             'min_value': 0.0,
             'max_value': 1.0
         })

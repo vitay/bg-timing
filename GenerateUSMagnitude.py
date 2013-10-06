@@ -26,7 +26,7 @@ def save_figure(fig, name, width=2, ratio=0.75):
     fig.set_size_inches((w, w*ratio))
 #    fig.savefig('figs/'+name+'.svg')
 #    fig.savefig('figs/'+name+'.eps')
-    fig.savefig('figs/'+name+'.jpg', bbox_inches="tight")
+    fig.savefig('figs/'+name+'.jpg', dpi=900, bbox_inches="tight")
 
 
 
@@ -107,7 +107,7 @@ def plot_evolution(nb_magnitude=11):
     ax.plot(xes, vta_before_CS, color='red', label='CS, trial #1')
     ax.plot(xes, vta_before_US, color='green', label='US, trial #1')
     ax.plot(xes, vta_after_CS, color='blue', label='CS, trial #10')
-    ax.plot(xes, vta_after_US, color='brown', label='US, trial #10')
+    ax.plot(xes, vta_after_US, color='black', label='US, trial #10')
     ax.set_xlabel('Reward magnitude')
     ax.set_ylabel('Amplitude of VTA bursts')
     
@@ -117,12 +117,16 @@ def plot_evolution(nb_magnitude=11):
     ax.plot(xes, bla_before_CS, color='red', label='CS, trial #1')
     ax.plot(xes, bla_before_US, color='green', label='US, trial #1')
     ax.plot(xes, bla_after_CS, color='blue', label='CS, trial #10')
-    ax.plot(xes, bla_after_US, color='brown', label='US, trial #10')
+    ax.plot(xes, bla_after_US, color='black', label='US, trial #10')
     ax.set_xlabel('Reward magnitude')
     ax.set_ylabel('Maximal activity in BLA')
     
+    
+    fig.text(0.05, 0.95,'(A)', fontweight='bold', fontsize=8)
+    fig.text(0.5, 0.95,'(B)', fontweight='bold', fontsize=8)
+    
     if save_figures:
-        save_figure(fig, 'VTA_evolution', width=2, ratio=0.5)
+        save_figure(fig, 'VTA_evolution', width=2, ratio=0.4)
     else:
         plt.show()
     plt.close()

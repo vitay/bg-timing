@@ -31,7 +31,7 @@ def save_figure(fig, name, width=2, ratio=0.75):
     fig.set_size_inches((w, w*ratio))
 #    fig.savefig('figs/'+name+'.svg')
 #    fig.savefig('figs/'+name+'.eps')
-    fig.savefig('figs/'+name+'.jpg', bbox_inches="tight")
+    fig.savefig('figs/'+name+'.jpg', dpi=900, bbox_inches="tight")
 
 
 
@@ -166,7 +166,7 @@ def plot_vta_peaks(nb_stim=2):
         ax.plot(US[stim], color='red', label='US')
     
     if save_figures:
-        save_figure(fig, 'VTA_peaks', width=2, ratio=0.5)
+        save_figure(fig, 'VTA_peaks', width=2, ratio=0.4)
     else:
         plt.show()
     plt.close()
