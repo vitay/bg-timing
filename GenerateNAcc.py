@@ -91,7 +91,7 @@ def plot_nacc():
     ax.legend(loc=2, frameon=False)
     
     if save_figures:
-        save_figure(fig, 'NAcc_activity', width=2, ratio=0.75)
+        save_figure(fig, 'NAcc_activity', width=2, ratio=0.6)
     else:
         plt.show()
     plt.close()   

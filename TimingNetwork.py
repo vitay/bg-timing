@@ -449,7 +449,7 @@ class TimingNetwork(Network):
                                     value=0.0, var_value=0.0, delay=0),
                             learning_rule=Hebb)
         proj.set_learning_parameters({
-            'tau': 150.0,
+            'tau': 100.0,
             'min_value': 0.0,
             'max_value': 2.0,
             'threshold_pre' : 0.0,

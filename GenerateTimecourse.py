@@ -165,6 +165,8 @@ def plot_vta_peaks(nb_stim=2):
             ax.set_ylabel('Amplitude of VTA bursts')
         ax.plot(np.arange(len(CS[stim]))+1, CS[stim], color='green', label='CS')
         ax.plot(np.arange(len(US[stim]))+1, US[stim], color='red', label='US')
+        if stim == 1:
+            ax.legend(loc=2, frameon=False)
     
     if save_figures:
         save_figure(fig, 'VTA_peaks', width=2, ratio=0.4)
@@ -181,7 +183,7 @@ def plot_bla(nb_stim=2):
         ax.set_xticks(ticks) 
         ax.set_xticklabels([ int(i) for i in ticks/1000.]) 
         cell = find_max_cell(np.array(data['BLA']['rate']))
-        ax.plot(np.array(data['BLA']['rate'])[cell], color='black', label='BLA max', lw=0.5)
+        ax.plot(np.array(data['BLA']['rate'])[cell], color='black', label='BLA max')
 
     print 'Generate BLA plot'
     fig, axes = plt.subplots(nrows=2, ncols=nb_stim, sharex=False, sharey=True)
@@ -199,14 +201,9 @@ def plot_bla(nb_stim=2):
             ax.set_ylabel('Trial 10')
         ax.set_xlabel('Time (s)')
         single_plot(conditioning_trials[9*nb_stim + stim], ax)
-
-#        ax = axes[2, stim]
-#        if stim == 0:
-#            ax.set_ylabel('Population activity')
-#        ax.imshow(np.array(conditioning_trials[9*nb_stim + stim]['vmPFC']['rate']), aspect='auto')
     
     if save_figures:
-        save_figure(fig, 'BLA_activity', width=2, ratio=0.6)
+        save_figure(fig, 'BLA_activity', width=2, ratio=0.5)
     else:
         plt.show()
     plt.close()

@@ -17,7 +17,7 @@ learn_network = True # Do not relearn the task
 save_figures = True # Save the the figures or display them
 
 # Recorded data
-recorded_areas = ['VTA']
+recorded_areas = ['VTA', 'NAcc']
 extinction_trials = []
     
 def save_figure(fig, name, width=2, ratio=0.75):
@@ -47,6 +47,13 @@ def run_simulation(nb_stim=2, nb_valuation = 10, nb_conditioning = 10, nb_extinc
     # Stop learning in the LH -> BLA pathway
     net.projection(pre="LH", post="BLA", connection_type="exc").set_learning_parameters({'tau': 10000000.0})
 
+    # Extinction trial with learning disabled
+    for stim in range(nb_stim):
+        net.learn=False
+        net.record(recorded_areas)
+        extinction_trial(net, CS=stim+1) # CS1, US1
+        extinction_trials.append(net.get_recordings())
+            
     # Start the conditioning phase
     for trial in range(nb_conditioning):
         for stim in range(nb_stim):
@@ -67,7 +74,7 @@ def run_simulation(nb_stim=2, nb_valuation = 10, nb_conditioning = 10, nb_extinc
 
 def plot_vta(nb_stim=2):
     "Shows activity of the VTA cell during conditioning (similar to Schultz 1998)."
-    def analyse(data):
+    def analyse_min(data):
         US=[[] for stim in range(nb_stim)]
         stim = 0
         for trial in data:
@@ -75,10 +82,20 @@ def plot_vta(nb_stim=2):
             US[stim].append(np.min(vta))
             stim = (stim + 1)%nb_stim
         return US
+    def analyse_nacc(data):
+        US=[[] for stim in range(nb_stim)]
+        stim = 0
+        for trial in data:
+            nacc = np.array(trial['NAcc']['rate'])
+            cell=find_max_cell(nacc)
+            US[stim].append(np.max(nacc[cell][2000:]))
+            stim = (stim + 1)%nb_stim
+        return US
         
         
     print 'Generate VTA plot'
-    US = analyse(extinction_trials)
+    US = analyse_min(extinction_trials)
+    nacc = analyse_nacc(extinction_trials)
     fig, axes = plt.subplots(nrows=1, ncols=nb_stim,  sharex='col', sharey='row')
 
     for stim in range(nb_stim):
@@ -86,10 +103,12 @@ def plot_vta(nb_stim=2):
         ax = axes[stim]
         ax.set_title(title)
         ax.set_xlabel('Trial')
-        ax.set_ylim((0.0, 0.3))
+        ax.set_ylim((0.0, 1.3))
+        ax.plot(np.arange(len(US[stim])), US[stim], color='red', label='VTA')
+        ax.plot(np.arange(len(nacc[stim])), nacc[stim], color='blue', label='NAcc')
         if stim == 0:
-            ax.set_ylabel('Minimal VTA activity during extinction')
-        ax.plot(np.arange(len(US[stim]))+1, US[stim], color='black', label='US')
+            ax.set_ylabel('VTA and NAcc during reward omission')
+            ax.legend(loc=7, frameon=False)
     
     if save_figures:
         save_figure(fig, 'VTA_dips', width=2, ratio=0.5)
