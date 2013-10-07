@@ -92,14 +92,10 @@ def plot_vta(nb_stim=2):
         ax.set_xticks(ticks) 
         ax.set_xticklabels([ int(i) for i in ticks/1000.]) 
         ax.set_yticks([0.0, 0.25, 0.5, 0.75, 1.0])
-#        ax.axis["right"].set_visible(False)
-#        ax.axis["top"].set_visible(False)
-#        ax.spines["right"].set_visible(False)
-#        ax.spines["top"].set_visible(False)
         ax.plot(dopa, color='black', lw=1, label='VTA')
         
     print 'Generate VTA plot'
-    fig, axes = plt.subplots(nrows=5, ncols=nb_stim,  sharex='col', sharey='row')
+    fig, axes = plt.subplots(nrows=5, ncols=nb_stim, sharey=True)
 
     for stim in range(nb_stim):
         title = "CS%(rk)s - US%(rk)s" % {'rk': str(stim+1) }
