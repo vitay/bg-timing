@@ -95,7 +95,7 @@ def plot_vta(nb_stim=2):
         ax.plot(dopa, color='black', lw=1, label='VTA')
         
     print 'Generate VTA plot'
-    fig, axes = plt.subplots(nrows=5, ncols=nb_stim, sharey=True)
+    fig, axes = plt.subplots(nrows=5, ncols=nb_stim, sharex='col', sharey='row')
 
     for stim in range(nb_stim):
         title = "CS%(rk)s - US%(rk)s" % {'rk': str(stim+1) }
