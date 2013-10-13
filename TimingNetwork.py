@@ -431,7 +431,7 @@ class TimingNetwork(Network):
                                     value=0.0, var_value=0.0,  delay=0),
                             learning_rule=DA_Covariance)
         proj.set_learning_parameters({
-            'tau': 50.0,
+            'tau': 100.0,
             'K_LTD': 10.0,
             'min_value': -0.2,
             'K_alpha': 10.0,
