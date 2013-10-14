@@ -91,17 +91,17 @@ def plot_all(nb_stim=2):
     ax.set_ylabel('Inputs')
     set_ticks(ax, ticks)
     rec = np.array(cond['LH']['rate'][0])
-    ax.plot(rec, color='red')
-    rec = np.array(cond['VIS']['rate'][0])
     ax.plot(rec, color='black')
+    rec = np.array(cond['VIS']['rate'][0])
+    ax.plot(rec, 'k:')
 
     ax = axes[0, 1]
     ax.set_title("Extinction trial")
     set_ticks(ax, ticks)
     rec = np.array(ext['LH']['rate'][0])
-    ax.plot(rec, color='red')
-    rec = np.array(cond['VIS']['rate'][0])
     ax.plot(rec, color='black')
+    rec = np.array(cond['VIS']['rate'][0])
+    ax.plot(rec, 'k:')
     
     ax = axes[1, 0]
     ax.set_ylabel('VTA')
@@ -182,8 +182,12 @@ def plot_all(nb_stim=2):
     rec = np.array(ext['RMTg']['rate'][0])
     ax.plot(rec, color='black')
     
+    
+    fig.text(0.05, 0.95,'(A)', fontweight='bold', fontsize=8)
+    fig.text(0.5, 0.95,'(B)', fontweight='bold', fontsize=8)
+    
     if save_figures:
-        save_figure(fig, 'timecourse_all', width=2, ratio=0.9)
+        save_figure(fig, 'timecourse_all', width=2, ratio=0.7)
     else:
         plt.show()
     plt.close()
