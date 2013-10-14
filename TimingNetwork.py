@@ -251,7 +251,7 @@ class TimingNetwork(Network):
         self.population("RMTg").set_parameters({
             'tau': 10.0,
             'noise': self.noise,
-            'threshold': 0.5,
+            'threshold': 0.0, # was 0.5
             'max_rate': 1.1
         })
         self.population("RMTg").set_variables({
@@ -298,15 +298,15 @@ class TimingNetwork(Network):
                              value=1.0, delay=0))
 
 #        # Gustatory input to PPTN
-#        self.connect(all2all(pre="LH", post="CE", connection_type="exc",
-#                             value=1.0, delay=0))
+#        self.connect(all2all(pre="LH", post="PPTN", connection_type="exc",
+#                             value=0.5, delay=0))
 
         #######################
         # VTA and RMTg
         #######################
 
         # CE -> PPTN, exc
-        self.connect(all2all(pre="CE", post="PPTN", connection_type="exc",
+        self.connect(all2all(pre="CE", post="PPTN", connection_type="mod",
                              value=1.5, delay=0) )
         # PPTN -> VTA, exc
         self.connect(all2all(pre="PPTN", post="VTA", connection_type="exc",
@@ -340,7 +340,7 @@ class TimingNetwork(Network):
                              value=1.0, delay=0))
         # Drive to the ON channel
         self.connect(one2one(pre="DRIVE", post="LH", connection_type="drive",
-                             value=0.5, delay=0))
+                             value=1.0, delay=0))
 
         #######################
         # Amygdala
@@ -352,7 +352,7 @@ class TimingNetwork(Network):
 
         # LH to BLA, exc (US)
         proj = self.connect(fixed_number_pre(pre="LH", post="BLA", connection_type="exc",
-                                    value=0.5, var_value= 0.1, number=2, delay=0),
+                                    value=0.3, var_value= 0.1, number=2, delay=0),
                             learning_rule=DA_Covariance )
         proj.set_learning_parameters({
             'tau': 100.0,
@@ -431,7 +431,7 @@ class TimingNetwork(Network):
                                     value=0.0, var_value=0.0,  delay=0),
                             learning_rule=DA_Covariance)
         proj.set_learning_parameters({
-            'tau': 100.0,
+            'tau': 50.0,
             'K_LTD': 10.0,
             'min_value': -0.2,
             'K_alpha': 10.0,

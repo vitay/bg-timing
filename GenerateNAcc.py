@@ -25,7 +25,7 @@ def find_max_cell(data):
     return np.argmax(np.mean(data, axis=1))
     
 def save_figure(fig, name, width=2, ratio=0.75):
-    matplotlib.rcParams.update({'font.size': 8})
+    matplotlib.rcParams.update({'font.size': 6})
     w = int(float(width) * 90./25.4)
     fig.set_dpi(900)
     fig.set_size_inches((w, w*ratio))
@@ -84,14 +84,14 @@ def plot_nacc():
     ax.set_ylim((-2.0, 1.5))
     
     #ax.plot(np.array(data['rate'])[cell], color='black', label='rate')
-    ax.plot(np.array(data['mp'])[cell], color='red', label='mp')
-    ax.plot(np.array(data['mp_up'])[cell] - 0.9, color='green', label='up/down state')
-    ax.plot(np.array(data['vmpfc'])[cell], color='blue', label='vmpfc')    
+    ax.plot(np.array(data['mp'])[cell], color='red', lw=0.5, label='membrane potential')
+    ax.plot(np.array(data['mp_up'])[cell] - 0.9, color='green', lw=0.5, label='up/down state')
+    ax.plot(np.array(data['vmpfc'])[cell], color='blue', lw=0.5, label='vmpfc input')    
     #ax.plot(np.array(data['bla'])[cell], color='green', label='bla')
-    ax.legend(loc=2, frameon=False)
+    ax.legend(loc=2, frameon=False, prop={'size':6}, labelspacing=0.2)
     
     if save_figures:
-        save_figure(fig, 'NAcc_activity', width=2, ratio=0.6)
+        save_figure(fig, 'NAcc_activity', width=1, ratio=0.8)
     else:
         plt.show()
     plt.close()   

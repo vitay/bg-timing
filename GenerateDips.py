@@ -111,7 +111,7 @@ def plot_vta(nb_stim=2):
             ax.legend(loc=7, frameon=False)
     
     if save_figures:
-        save_figure(fig, 'VTA_dips', width=2, ratio=0.5)
+        save_figure(fig, 'VTA_dips', width=2, ratio=0.35)
     else:
         plt.show()
     plt.close()

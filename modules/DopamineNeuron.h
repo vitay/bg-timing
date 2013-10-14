@@ -18,6 +18,7 @@ class DopamineNeuron : public annarNeuron
             
             input_ = 0.0;
             mean_input_ = 0.0;
+            mean_dip_ = 0.0;
             inhibition_ = 0.0;
             dip_ = 0.0;
 
@@ -35,11 +36,12 @@ class DopamineNeuron : public annarNeuron
             mean_input_+= dt_/tau_decrease_* (input_-mean_input_);
             
             dip_= sum("inh");       
+            mean_dip_+= dt_/tau_decrease_* (dip_-mean_dip_);
             
             mp_+= dt_/tau_ * (-mp_ 
                                 + input_ * positive(1.0 - inhibition_ ) 
                                 //+ positive(input_ - mean_input_) * positive(1.0 - sum("mod") ) 
-                                - (mean_input_< 0.1? dip_ : 0.0) //* positive(mean_input_ - input_ + 0.05)  
+                                - (mean_input_< 0.1? positive(dip_ - mean_dip_) : 0.0) //* positive(mean_input_ - input_ + 0.05)  
                                 + baseline_ + noise_*(2.0*rand_num-1.0));
             
             rate_ = positive(mp_ - threshold_);
@@ -56,6 +58,7 @@ class DopamineNeuron : public annarNeuron
         @PARAMETER FLOAT tau_modulation_; // Time constant for the inhibitory modulation from NAcc.
         @VARIABLE FLOAT input_; // Received reward
         @VARIABLE FLOAT mean_input_; // Mean received reward (for phasic activation)
+        @VARIABLE FLOAT mean_dip_; // Mean received reward (for phasic activation)
         @VARIABLE FLOAT inhibition_; // Inhibition received from NAcc
         @VARIABLE FLOAT dip_; // Inhibition from RMTg
 };
