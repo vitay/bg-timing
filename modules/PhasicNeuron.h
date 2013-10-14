@@ -14,7 +14,6 @@ class PhasicNeuron : public annarNeuron
             threshold_ = 0.0;
             tau_adaptation_ = 1000.0;
             adapted_input_ = 0.0;
-            adapted_mod_ = 0.0;
             max_rate_ = 1.1;
 
         };
@@ -22,10 +21,9 @@ class PhasicNeuron : public annarNeuron
         virtual void step(){
 
             adapted_input_ += dt_/tau_adaptation_ * (sum("exc") - adapted_input_);
-            adapted_mod_ += dt_/tau_adaptation_ * (sum("mod") - adapted_mod_);
             
             mp_+= dt_/tau_ * (-mp_ + positive(sum("exc") - adapted_input_) 
-                                   + positive(sum("mod") - adapted_mod_) * (positive(sum("exc") - adapted_input_) > 0.1 ? 0.0 : 1.0)
+                                   - sum("inh")
                                    + baseline_ 
                                    + noise_*(2.0*rand_num-1.0) );
             
@@ -40,7 +38,6 @@ class PhasicNeuron : public annarNeuron
         @PARAMETER FLOAT threshold_; // Threshold for the firing rate
         @PARAMETER FLOAT tau_adaptation_; // time constant for the adaptation of exc inputs
         @VARIABLE FLOAT adapted_input_; // Adapted input
-        @VARIABLE FLOAT adapted_mod_; // Adapted input
         @PARAMETER FLOAT max_rate_; // max firing rate
 };
 

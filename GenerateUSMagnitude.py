@@ -108,6 +108,7 @@ def plot_evolution(nb_magnitude=11):
     ax.plot(xes, vta_after_US, color='black', label='US, trial #10')
     ax.set_xlabel('Reward magnitude')
     ax.set_ylabel('Amplitude of VTA bursts')
+    ax.legend(loc=2, frameon=False , prop={'size':8}, labelspacing=0.4)
     
     ax = axes[1]
     ax.set_ylim((0., 1.35))
@@ -118,6 +119,7 @@ def plot_evolution(nb_magnitude=11):
     ax.plot(xes, bla_after_US, color='black', label='US, trial #10')
     ax.set_xlabel('Reward magnitude')
     ax.set_ylabel('Maximal activity in BLA')
+    ax.legend(loc=2, frameon=False , prop={'size':8}, labelspacing=0.4)
     
     
     fig.text(0.05, 0.95,'(A)', fontweight='bold', fontsize=8)

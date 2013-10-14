@@ -272,14 +272,24 @@ class TimingNetwork(Network):
         })
 
         # Pedunculopontine nucleus
-        self.add(name="PPTN", width=1,
+        self.add(name="PPTN_CS", width=1,
                  neuron=PhasicNeuron)
-        self.population("PPTN").set_parameters({
+        self.population("PPTN_CS").set_parameters({
             'tau': 10.0,
             'noise': self.noise,
             'tau_adaptation': 50.0
         })
-        self.population("PPTN").set_variables({
+        self.population("PPTN_CS").set_variables({
+            'baseline': 0.0
+        })
+        self.add(name="PPTN_US", width=1,
+                 neuron=PhasicNeuron)
+        self.population("PPTN_US").set_parameters({
+            'tau': 10.0,
+            'noise': self.noise,
+            'tau_adaptation': 50.0
+        })
+        self.population("PPTN_US").set_variables({
             'baseline': 0.0
         })
 
@@ -297,23 +307,34 @@ class TimingNetwork(Network):
         self.connect(stripes(pre="VIS", post="vmPFC", connection_type="exc",
                              value=1.0, delay=0))
 
-#        # Gustatory input to PPTN
-#        self.connect(all2all(pre="LH", post="PPTN", connection_type="exc",
-#                             value=0.5, delay=0))
+
+        #######################
+        # PPTN
+        #######################
+                              
+        # Gustatory input to PPTN
+        self.connect(all2all(pre="LH", post="PPTN_US", connection_type="exc",
+                             value=0.75 ))
+        # CE -> PPTN, exc
+        self.connect(all2all(pre="CE", post="PPTN_CS", connection_type="exc",
+                             value=1.5) )
+        # PPTN -> PPTN, inh
+        self.connect(all2all(pre="PPTN_US", post="PPTN_CS", connection_type="inh",
+                             value=2.0, delay=0) )
+        # PPTN -> VTA, exc
+        self.connect(all2all(pre="PPTN_US", post="VTA", connection_type="exc",
+                             value=1.5, delay=0) )
+        self.connect(all2all(pre="PPTN_CS", post="VTA", connection_type="exc",
+                             value=1.5, delay=0) )
+
 
         #######################
         # VTA and RMTg
         #######################
-
-        # CE -> PPTN, exc
-        self.connect(all2all(pre="CE", post="PPTN", connection_type="mod",
-                             value=1.5, delay=0) )
-        # PPTN -> VTA, exc
-        self.connect(all2all(pre="PPTN", post="VTA", connection_type="exc",
-                             value=1.5, delay=0) )
-
         # PPTN -> VP, exc
-        self.connect(all2all(pre="PPTN", post="VP", connection_type="exc",
+        self.connect(all2all(pre="PPTN_US", post="VP", connection_type="exc",
+                             value=0.5, delay=0))
+        self.connect(all2all(pre="PPTN_CS", post="VP", connection_type="exc",
                              value=0.5, delay=0))
         # VP -> RMTg, inh
         self.connect(all2all(pre="VP", post="RMTg", connection_type="inh",
@@ -468,36 +489,6 @@ class TimingNetwork(Network):
             'threshold_post' : 0.0
         })
         
-        
-#        #######################
-#        # OFC representation of incentive value
-#        #######################
-#        
-#        # Dopaminergic modulation of OFC
-#        self.connect(all2all(pre="VTA", post="OFC", connection_type="dopa",
-#                             value=1.0, delay=0))
-#                                     
-#        # Visual input to OFC
-#        proj = self.connect(all2all(pre="IT", post="OFC", connection_type="mod",
-#                            value=0.0, delay=0),
-#                    learning_rule=DA_Copy )
-#        proj.set_learning_parameters({
-#            'tau': 500.0,
-#            'min_value': 0.0,
-#            'K_alpha': 1.0,
-#            'K_LTD': 1.0,
-#            'tau_alpha': 1.0,
-#            'tau_dopa': 300.0,
-#            'regularization_threshold': 1.0,
-#            'DA_threshold_positive': 0.4,
-#            'DA_threshold_negative': 0.1,
-#            'DA_K_positive': 10.0,
-#            'DA_K_negative': 1.0
-#        })
-#        
-#        # BLA input to OFC
-#        proj = self.connect(one2one(pre="BLA", post="OFC", connection_type="exc",
-#                                    value=1.0, var_value= 0.0, delay=0) )
 
 #######################
 # Methods for learning

@@ -17,7 +17,7 @@ learn_network = True # Do not relearn the task
 save_figures = True # Save the the figures or display them
 
 # Recorded data
-recorded_areas = ['BLA', 'VTA', 'LH', 'VIS', 'NAcc', 'CE', 'PPTN', 'VP', 'RMTg', 'LHb']
+recorded_areas = ['BLA', 'VTA', 'LH', 'VIS', 'NAcc', 'CE', 'PPTN_US', 'PPTN_CS', 'VP', 'RMTg', 'LHb']
 conditioning_trials = []
 extinction_trials = []
 
@@ -93,7 +93,7 @@ def plot_all(nb_stim=2):
     rec = np.array(cond['LH']['rate'][0])
     ax.plot(rec, color='black')
     rec = np.array(cond['VIS']['rate'][0])
-    ax.plot(rec, 'k:')
+    ax.plot(rec, color='blue')
 
     ax = axes[0, 1]
     ax.set_title("Extinction trial")
@@ -101,7 +101,7 @@ def plot_all(nb_stim=2):
     rec = np.array(ext['LH']['rate'][0])
     ax.plot(rec, color='black')
     rec = np.array(cond['VIS']['rate'][0])
-    ax.plot(rec, 'k:')
+    ax.plot(rec, color='blue')
     
     ax = axes[1, 0]
     ax.set_ylabel('VTA')
@@ -128,13 +128,17 @@ def plot_all(nb_stim=2):
     ax = axes[3, 0]
     ax.set_ylabel('PPTN')
     set_ticks(ax, ticks)
-    rec = np.array(cond['PPTN']['rate'][0])
+    rec = np.array(cond['PPTN_US']['rate'][0])
     ax.plot(rec, color='black')
+    rec = np.array(cond['PPTN_CS']['rate'][0])
+    ax.plot(rec, color='blue')
 
     ax = axes[3, 1]
     set_ticks(ax, ticks)
-    rec = np.array(ext['PPTN']['rate'][0])
+    rec = np.array(ext['PPTN_US']['rate'][0])
     ax.plot(rec, color='black')
+    rec = np.array(ext['PPTN_CS']['rate'][0])
+    ax.plot(rec, color='blue')
     
     ax = axes[4, 0]
     ax.set_ylabel('NAcc')
@@ -173,12 +177,14 @@ def plot_all(nb_stim=2):
 
     ax = axes[7, 0]
     ax.set_ylabel('RMTg')
+    ax.set_xlabel('Time (s)')
     set_ticks(ax, ticks)
     rec = np.array(cond['RMTg']['rate'][0])
     ax.plot(rec, color='black')
 
     ax = axes[7, 1]
     set_ticks(ax, ticks)
+    ax.set_xlabel('Time (s)')
     rec = np.array(ext['RMTg']['rate'][0])
     ax.plot(rec, color='black')
     

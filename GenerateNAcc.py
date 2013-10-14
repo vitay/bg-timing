@@ -85,10 +85,10 @@ def plot_nacc():
     
     #ax.plot(np.array(data['rate'])[cell], color='black', label='rate')
     ax.plot(np.array(data['mp'])[cell], color='red', lw=0.5, label='membrane potential')
-    ax.plot(np.array(data['mp_up'])[cell] - 0.9, color='green', lw=0.5, label='up/down state')
+    ax.plot(np.array(data['mp_up'])[cell] - 0.8, color='green', lw=0.5, label='up/down state')
     ax.plot(np.array(data['vmpfc'])[cell], color='blue', lw=0.5, label='vmpfc input')    
     #ax.plot(np.array(data['bla'])[cell], color='green', label='bla')
-    ax.legend(loc=2, frameon=False, prop={'size':6}, labelspacing=0.2)
+    ax.legend(loc=2, frameon=False, prop={'size':6}, labelspacing=0.3)
     
     if save_figures:
         save_figure(fig, 'NAcc_activity', width=1, ratio=0.8)

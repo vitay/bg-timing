@@ -88,6 +88,7 @@ def plot_vta(nb_stim=2):
         dopa = np.array(data['VTA']['rate'][0])
         duration = len(dopa)
         ticks = np.linspace(0, duration, int(duration/1000)+1)
+        ax.set_xlim((0., duration))
         ax.set_ylim((0., 1.2))
         ax.set_xticks(ticks) 
         ax.set_xticklabels([ int(i) for i in ticks/1000.]) 
