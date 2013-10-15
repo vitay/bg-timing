@@ -285,7 +285,7 @@ class TimingNetwork(Network):
         self.add(name="PPTN_US", width=1,
                  neuron=PhasicNeuron)
         self.population("PPTN_US").set_parameters({
-            'tau': 10.0,
+            'tau': 30.0, # was 10.0
             'noise': self.noise,
             'tau_adaptation': 50.0
         })
