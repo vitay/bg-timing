@@ -285,7 +285,7 @@ class TimingNetwork(Network):
         self.add(name="PPTN_US", width=1,
                  neuron=PhasicNeuron)
         self.population("PPTN_US").set_parameters({
-            'tau': 30.0, # was 10.0
+            'tau': 10.0, # was 10.0
             'noise': self.noise,
             'tau_adaptation': 50.0
         })
@@ -318,7 +318,7 @@ class TimingNetwork(Network):
         # CE -> PPTN, exc
         self.connect(all2all(pre="CE", post="PPTN_CS", connection_type="exc",
                              value=1.5) )
-        # PPTN -> PPTN, inh
+        # PPTN <-> PPTN, inh
         self.connect(all2all(pre="PPTN_US", post="PPTN_CS", connection_type="inh",
                              value=2.0, delay=0) )
         # PPTN -> VTA, exc
