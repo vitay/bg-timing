@@ -317,7 +317,7 @@ class TimingNetwork(Network):
                              value=0.75 ))
         # CE -> PPTN, exc
         self.connect(all2all(pre="CE", post="PPTN_CS", connection_type="exc",
-                             value=1.5) )
+                             value=1.3) )
         # PPTN <-> PPTN, inh
         self.connect(all2all(pre="PPTN_US", post="PPTN_CS", connection_type="inh",
                              value=2.0, delay=0) )

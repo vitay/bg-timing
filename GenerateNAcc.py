@@ -35,7 +35,7 @@ def save_figure(fig, name, width=2, ratio=0.75):
 
 
 
-def run_simulation(nb_valuation = 10, nb_conditioning = 10, nb_extinction = 1, nb_sooner = 0, record=None):
+def run_simulation(nb_valuation = 10, nb_conditioning = 15, nb_extinction = 1, nb_sooner = 0, record=None):
     "Trains the network on the conditioning task for different US magnitudes"
     
     # Create the network

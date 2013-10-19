@@ -30,7 +30,7 @@ def save_figure(fig, name, width=2, ratio=0.75):
 
 
 
-def run_simulation(nb_magnitude=10, nb_valuation = 10, nb_conditioning = 10, nb_extinction = 1, nb_sooner = 1, record=None):
+def run_simulation(nb_magnitude=10, nb_valuation = 10, nb_conditioning = 15, nb_extinction = 1, nb_sooner = 1, record=None):
     "Trains the network on the conditioning task for different US magnitudes"
     
     for magnitude in range(nb_magnitude):
@@ -67,58 +67,36 @@ def run_simulation(nb_magnitude=10, nb_valuation = 10, nb_conditioning = 10, nb_
         last_trials.append(net.get_recordings())
         net.stop_recording()        
                 
-    # Save recordings
-    recordings = {'first': first_trials,
-                  'last': last_trials}
-    cPickle.dump(recordings, open('recordings_multiple.data', 'w')) 
+#    # Save recordings
+#    recordings = {'first': first_trials,
+#                  'last': last_trials}
+#    cPickle.dump(recordings, open('recordings_multiple.data', 'w')) 
     
-def plot_evolution(nb_magnitude=11):
-
-    def analyse_vta(data, pop):
-        CS=[]; US=[]
-        for rec in data:
-            vals = np.array(rec[pop]['rate'][0])
-            CS.append(np.max(vals[900:1100]))
-            US.append(np.max(vals[2900:3100]))
-        return CS, US
-
-    def analyse_bla(data, pop):
-        CS=[]; US=[]
-        for rec in data:
-            vals = np.max(np.array(rec[pop]['rate']), axis=0)
-            CS.append(np.max(vals[900:1100]))
-            US.append(np.max(vals[2900:3100]))
-        return CS, US
-    
-    vta_before_CS, vta_before_US = analyse_vta(first_trials, 'VTA')
-    vta_after_CS, vta_after_US = analyse_vta(last_trials, 'VTA')
-    
-    bla_before_CS, bla_before_US = analyse_bla(first_trials, 'BLA')
-    bla_after_CS, bla_after_US = analyse_bla(last_trials, 'BLA')
-    
+def plot_evolution(bla, vta, nb_magnitude=11):    
     
     fig, axes = plt.subplots(nrows=1, ncols=2)
     
+    
     ax = axes[0]
-    ax.set_ylim((0., 1.2))
+    ax.set_ylim((0., 1.35))
     xes = np.arange(nb_magnitude)/float(nb_magnitude-1)
-    ax.plot(xes, vta_before_CS, color='red', label='CS, trial #1')
-    ax.plot(xes, vta_before_US, color='green', label='US, trial #1')
-    ax.plot(xes, vta_after_CS, color='blue', label='CS, trial #10')
-    ax.plot(xes, vta_after_US, color='black', label='US, trial #10')
+    ax.plot(xes, bla[0], color='red', label='CS, trial #1')
+    ax.plot(xes, bla[1], color='green', label='US, trial #1')
+    ax.plot(xes, bla[2], color='blue', label='CS, trial #15')
+    ax.plot(xes, bla[3], color='black', label='US, trial #15')
     ax.set_xlabel('Reward magnitude')
-    ax.set_ylabel('Amplitude of VTA bursts')
+    ax.set_ylabel('Maximal activity in BLA')
     ax.legend(loc=2, frameon=False , prop={'size':8}, labelspacing=0.4)
     
     ax = axes[1]
-    ax.set_ylim((0., 1.35))
+    ax.set_ylim((0., 1.2))
     xes = np.arange(nb_magnitude)/float(nb_magnitude-1)
-    ax.plot(xes, bla_before_CS, color='red', label='CS, trial #1')
-    ax.plot(xes, bla_before_US, color='green', label='US, trial #1')
-    ax.plot(xes, bla_after_CS, color='blue', label='CS, trial #10')
-    ax.plot(xes, bla_after_US, color='black', label='US, trial #10')
+    ax.plot(xes, vta[0], color='red', label='CS, trial #1')
+    ax.plot(xes, vta[1], color='green', label='US, trial #1')
+    ax.plot(xes, vta[2], color='blue', label='CS, trial #15')
+    ax.plot(xes, vta[3], color='black', label='US, trial #15')
     ax.set_xlabel('Reward magnitude')
-    ax.set_ylabel('Maximal activity in BLA')
+    ax.set_ylabel('Amplitude of VTA bursts')
     ax.legend(loc=2, frameon=False , prop={'size':8}, labelspacing=0.4)
     
     
@@ -130,24 +108,63 @@ def plot_evolution(nb_magnitude=11):
     else:
         plt.show()
     plt.close()
+ 
+def analyse_vta(data, pop):
+    CS=[]; US=[]
+    for rec in data:
+        vals = np.array(rec[pop]['rate'][0])
+        CS.append(np.max(vals[900:1100]))
+        US.append(np.max(vals[2900:3100]))
+    return CS, US
+
+def analyse_bla(data, pop):
+    CS=[]; US=[]
+    for rec in data:
+        vals = np.max(np.array(rec[pop]['rate']), axis=0)
+        CS.append(np.max(vals[900:1100]))
+        US.append(np.max(vals[2900:3100]))
+    return CS, US 
     
 if __name__=='__main__':
 
-    #############################
-    ### Simulation
-    #############################
+    bla = [[], [], [], []]
+    vta = [[], [], [], []]
     
-    if learn_network:
+    for n in range(1):
         # Run the simulation
         run_simulation(nb_magnitude=11, record=recorded_areas)
-    else: # Retrieve saved data
-        net = load('net.zip')
-        recordings = cPickle.load(open('recordings_multiple.data', 'r')) 
-        first_trials = recordings['first']
-        last_trials = recordings['last']
         
-    #############################
-    ### Analyse the recordings
-    #############################
+        # Analyse recordings
+        bla_before_CS, bla_before_US = analyse_bla(first_trials, 'BLA')
+        bla_after_CS, bla_after_US = analyse_bla(last_trials, 'BLA')
+        vta_before_CS, vta_before_US = analyse_vta(first_trials, 'VTA')
+        vta_after_CS, vta_after_US = analyse_vta(last_trials, 'VTA')
+        
+        bla[0].append(bla_before_CS)
+        bla[1].append(bla_before_US)
+        bla[2].append(bla_after_CS)
+        bla[3].append(bla_after_US)
+        
+        vta[0].append(vta_before_CS)
+        vta[1].append(vta_before_US)
+        vta[2].append(vta_after_CS)
+        vta[3].append(vta_after_US)
+        
+        # Reset recordings
+        first_trials = []
+        last_trials = []
+        
+    # Compute the mean
+    bla_mean=[]
+    bla_mean.append(np.mean(bla[0], axis=0))
+    bla_mean.append(np.mean(bla[1], axis=0))
+    bla_mean.append(np.mean(bla[2], axis=0))
+    bla_mean.append(np.mean(bla[3], axis=0))
+    vta_mean=[]
+    vta_mean.append(np.mean(vta[0], axis=0))
+    vta_mean.append(np.mean(vta[1], axis=0))
+    vta_mean.append(np.mean(vta[2], axis=0))
+    vta_mean.append(np.mean(vta[3], axis=0))
     
-    plot_evolution(nb_magnitude=11)
+    # Do the plot
+    plot_evolution(bla_mean, vta_mean, nb_magnitude=11)

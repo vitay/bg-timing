@@ -36,7 +36,7 @@ def save_figure(fig, name, width=2, ratio=0.75):
 def find_max_cell(data):
     return np.argmax(np.mean(data, axis=1))
 
-def run_simulation(nb_stim=2, nb_valuation = 10, nb_conditioning = 10, nb_extinction = 1, nb_sooner = 1):
+def run_simulation(nb_stim=2, nb_valuation = 10, nb_conditioning = 15, nb_extinction = 1, nb_sooner = 1):
     "Trains the network on the conditioning task"
     # Create the network
     net = TimingNetwork()
@@ -114,8 +114,8 @@ def plot_vta(nb_stim=2):
 
         ax = axes[2, stim]
         if stim == 0:
-            ax.set_ylabel('Trial 10')
-        single_plot(conditioning_trials[9*nb_stim + stim], ax)
+            ax.set_ylabel('Trial 15')
+        single_plot(conditioning_trials[14*nb_stim + stim], ax)
     
         ax = axes[3, stim]
         if stim == 0:
@@ -154,6 +154,7 @@ def plot_vta_peaks(nb_stim=2):
     
     for stim in range(nb_stim):
         ax = axes[stim]
+        ax.set_xlim((1, len(CS[stim])))
         ax.set_ylim((0., 1.2))
         title = "CS%(rk)s - US%(rk)s" % {'rk': str(stim+1) }
         ax.set_title(title)
@@ -166,7 +167,7 @@ def plot_vta_peaks(nb_stim=2):
             ax.legend(loc=2, frameon=False)
     
     if save_figures:
-        save_figure(fig, 'VTA_peaks', width=2, ratio=0.4)
+        save_figure(fig, 'VTA_peaks', width=2, ratio=0.35)
     else:
         plt.show()
     plt.close()
@@ -195,9 +196,9 @@ def plot_bla(nb_stim=2):
 
         ax = axes[1, stim]
         if stim == 0:
-            ax.set_ylabel('Trial 10')
+            ax.set_ylabel('Trial 15')
         ax.set_xlabel('Time (s)')
-        single_plot(conditioning_trials[9*nb_stim + stim], ax)
+        single_plot(conditioning_trials[14*nb_stim + stim], ax)
     
     if save_figures:
         save_figure(fig, 'BLA_activity', width=2, ratio=0.5)

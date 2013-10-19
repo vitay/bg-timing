@@ -34,7 +34,7 @@ def save_figure(fig, name, width=2, ratio=0.75):
 def find_max_cell(data):
     return np.argmax(np.mean(data, axis=1))
 
-def run_simulation(nb_stim=2, nb_valuation = 10, nb_conditioning = 10, nb_extinction = 1, nb_sooner = 1):
+def run_simulation(nb_stim=2, nb_valuation = 15, nb_conditioning = 10, nb_extinction = 1, nb_sooner = 1):
     "Trains the network on the conditioning task"
     # Create the network
     net = TimingNetwork()
@@ -73,7 +73,7 @@ def run_simulation(nb_stim=2, nb_valuation = 10, nb_conditioning = 10, nb_extinc
 def plot_all(nb_stim=2):
     "Shows activity of the VTA cell during conditioning (similar to Schultz 1998)."
     def set_ticks(ax, ticks):
-        ax.set_ylim((0., 1.2))
+        ax.set_ylim((-0.05, 1.2))
         ax.set_xticks(ticks) 
         ax.set_xticklabels([ int(i) for i in ticks/1000.])         
         ax.set_yticks([0.0, 0.5, 1.0])  
@@ -96,7 +96,7 @@ def plot_all(nb_stim=2):
     ax.plot(rec, color='blue')
 
     ax = axes[0, 1]
-    ax.set_title("Extinction trial")
+    ax.set_title("Omission trial")
     set_ticks(ax, ticks)
     rec = np.array(ext['LH']['rate'][0])
     ax.plot(rec, color='black')

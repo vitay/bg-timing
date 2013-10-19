@@ -32,7 +32,7 @@ def save_figure(fig, name, width=2, ratio=0.75):
 def find_max_cell(data):
     return np.argmax(np.mean(data, axis=1))
 
-def run_simulation(nb_stim=2, nb_valuation = 10, nb_conditioning = 10, nb_extinction = 1, nb_sooner = 1):
+def run_simulation(nb_stim=2, nb_valuation = 10, nb_conditioning = 15, nb_extinction = 1, nb_sooner = 1):
     "Trains the network on the conditioning task"
     # Create the network
     net = TimingNetwork()
@@ -103,9 +103,10 @@ def plot_vta(nb_stim=2):
         ax = axes[stim]
         ax.set_title(title)
         ax.set_xlabel('Trial')
-        ax.set_ylim((0.0, 1.3))
-        ax.plot(np.arange(len(US[stim])), US[stim], color='red', label='VTA')
-        ax.plot(np.arange(len(nacc[stim])), nacc[stim], color='blue', label='NAcc')
+        ax.set_xlim((1, len(US[stim])))
+        ax.set_ylim((-0.05, 1.2))
+        ax.plot(np.arange(len(US[stim]))+1, US[stim], color='red', label='VTA')
+        ax.plot(np.arange(len(nacc[stim]))+1, nacc[stim], color='blue', label='NAcc')
         if stim == 0:
             ax.set_ylabel('VTA and NAcc during reward omission')
             ax.legend(loc=7, frameon=False)
