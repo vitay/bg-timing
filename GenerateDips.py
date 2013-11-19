@@ -111,6 +111,10 @@ def plot_vta(nb_stim=2):
             ax.set_ylabel('VTA and NAcc during reward omission')
             ax.legend(loc=7, frameon=False)
     
+    fig.text(0.08, 0.95,'(A)', fontweight='bold', fontsize=8)
+    fig.text(0.37, 0.95,'(B)', fontweight='bold', fontsize=8)
+    fig.text(0.64, 0.95,'(C)', fontweight='bold', fontsize=8)
+    
     if save_figures:
         save_figure(fig, 'VTA_dips', width=2, ratio=0.35)
     else:

@@ -80,10 +80,10 @@ def plot_evolution(bla, vta, nb_magnitude=11):
     ax = axes[0]
     ax.set_ylim((0., 1.35))
     xes = np.arange(nb_magnitude)/float(nb_magnitude-1)
-    ax.plot(xes, bla[0], color='red', label='CS, trial #1')
-    ax.plot(xes, bla[1], color='green', label='US, trial #1')
-    ax.plot(xes, bla[2], color='blue', label='CS, trial #15')
-    ax.plot(xes, bla[3], color='black', label='US, trial #15')
+    ax.plot(xes, bla[0], color='blue', linestyle=':', label='CS, trial #1')
+    ax.plot(xes, bla[1], color='red', linestyle=':', label='US, trial #1')
+    ax.plot(xes, bla[2], color='blue', linestyle='-', label='CS, trial #15')
+    ax.plot(xes, bla[3], color='red', linestyle='-', label='US, trial #15')
     ax.set_xlabel('Reward magnitude')
     ax.set_ylabel('Maximal activity in BLA')
     ax.legend(loc=2, frameon=False , prop={'size':8}, labelspacing=0.4)
@@ -91,10 +91,10 @@ def plot_evolution(bla, vta, nb_magnitude=11):
     ax = axes[1]
     ax.set_ylim((0., 1.2))
     xes = np.arange(nb_magnitude)/float(nb_magnitude-1)
-    ax.plot(xes, vta[0], color='red', label='CS, trial #1')
-    ax.plot(xes, vta[1], color='green', label='US, trial #1')
-    ax.plot(xes, vta[2], color='blue', label='CS, trial #15')
-    ax.plot(xes, vta[3], color='black', label='US, trial #15')
+    ax.plot(xes, vta[0], color='blue', linestyle=':', label='CS, trial #1')
+    ax.plot(xes, vta[1], color='red', linestyle=':', label='US, trial #1')
+    ax.plot(xes, vta[2], color='blue', linestyle='-', label='CS, trial #15')
+    ax.plot(xes, vta[3], color='red', linestyle='-', label='US, trial #15')
     ax.set_xlabel('Reward magnitude')
     ax.set_ylabel('Amplitude of VTA bursts')
     ax.legend(loc=2, frameon=False , prop={'size':8}, labelspacing=0.4)
@@ -104,7 +104,7 @@ def plot_evolution(bla, vta, nb_magnitude=11):
     fig.text(0.5, 0.95,'(B)', fontweight='bold', fontsize=8)
     
     if save_figures:
-        save_figure(fig, 'VTA_evolution', width=2, ratio=0.4)
+        save_figure(fig, 'VTA_evolution', width=2, ratio=0.35)
     else:
         plt.show()
     plt.close()
@@ -130,7 +130,7 @@ if __name__=='__main__':
     bla = [[], [], [], []]
     vta = [[], [], [], []]
     
-    for n in range(1):
+    for n in range(10):
         # Run the simulation
         run_simulation(nb_magnitude=11, record=recorded_areas)
         

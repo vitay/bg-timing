@@ -105,29 +105,80 @@ def plot_vta(nb_stim=2):
         if stim == 0:
             ax.set_ylabel('Trial 1')
         single_plot(conditioning_trials[stim], ax)
+        
+        if stim == 0:
+            ax.plot([1000, 4000], [1.1, 1.1], color='b', linestyle='-', linewidth=2)  
+            ax.plot([3000, 4000], [1.05, 1.05], color='r', linestyle='-', linewidth=2)   
+        if stim == 1:
+            ax.plot([1000, 5000], [1.1, 1.1], color='b', linestyle='-', linewidth=2) 
+            ax.plot([4000, 5000], [1.05, 1.05], color='r', linestyle='-', linewidth=2)  
+        if stim == 2:
+            ax.plot([1000, 6000], [1.1, 1.1], color='b', linestyle='-', linewidth=2) 
+            ax.plot([5000, 6000], [1.05, 1.05], color='r', linestyle='-', linewidth=2) 
 
         ax = axes[1, stim]
         if stim == 0:
             ax.set_ylabel('Trial 5')
         single_plot(conditioning_trials[4*nb_stim + stim], ax)
         
+        if stim == 0:
+            ax.plot([1000, 4000], [1.1, 1.1], color='b', linestyle='-', linewidth=2)  
+            ax.plot([3000, 4000], [1.05, 1.05], color='r', linestyle='-', linewidth=2)   
+        if stim == 1:
+            ax.plot([1000, 5000], [1.1, 1.1], color='b', linestyle='-', linewidth=2) 
+            ax.plot([4000, 5000], [1.05, 1.05], color='r', linestyle='-', linewidth=2)  
+        if stim == 2:
+            ax.plot([1000, 6000], [1.1, 1.1], color='b', linestyle='-', linewidth=2) 
+            ax.plot([5000, 6000], [1.05, 1.05], color='r', linestyle='-', linewidth=2) 
+        
 
         ax = axes[2, stim]
         if stim == 0:
             ax.set_ylabel('Trial 15')
         single_plot(conditioning_trials[14*nb_stim + stim], ax)
+        
+        if stim == 0:
+            ax.plot([1000, 4000], [1.1, 1.1], color='b', linestyle='-', linewidth=2)  
+            ax.plot([3000, 4000], [1.05, 1.05], color='r', linestyle='-', linewidth=2)   
+        if stim == 1:
+            ax.plot([1000, 5000], [1.1, 1.1], color='b', linestyle='-', linewidth=2) 
+            ax.plot([4000, 5000], [1.05, 1.05], color='r', linestyle='-', linewidth=2)  
+        if stim == 2:
+            ax.plot([1000, 6000], [1.1, 1.1], color='b', linestyle='-', linewidth=2) 
+            ax.plot([5000, 6000], [1.05, 1.05], color='r', linestyle='-', linewidth=2) 
     
         ax = axes[3, stim]
         if stim == 0:
             ax.set_ylabel('Sooner')
         single_plot(sooner_trials[stim], ax)
     
+        
+        if stim == 0:
+            ax.plot([1000, 3000], [1.1, 1.1], color='b', linestyle='-', linewidth=2)  
+            ax.plot([2000, 3000], [1.05, 1.05], color='r', linestyle='-', linewidth=2)   
+        if stim == 1:
+            ax.plot([1000, 4000], [1.1, 1.1], color='b', linestyle='-', linewidth=2) 
+            ax.plot([3000, 4000], [1.05, 1.05], color='r', linestyle='-', linewidth=2)  
+        if stim == 2:
+            ax.plot([1000, 5000], [1.1, 1.1], color='b', linestyle='-', linewidth=2) 
+            ax.plot([4000, 5000], [1.05, 1.05], color='r', linestyle='-', linewidth=2) 
+            
         ax = axes[4, stim]
         ax.set_xlabel('Time (s)')
         if stim == 0:
             ax.set_ylabel('Omission')
         single_plot(extinction_trials[stim], ax)
 
+        if stim == 0:
+            ax.plot([1000, 4000], [1.1, 1.1], color='b', linestyle='-', linewidth=2)   
+        if stim == 1:
+            ax.plot([1000, 5000], [1.1, 1.1], color='b', linestyle='-', linewidth=2)  
+        if stim == 2:
+            ax.plot([1000, 6000], [1.1, 1.1], color='b', linestyle='-', linewidth=2) 
+    
+    fig.text(0.08, 0.95,'(A)', fontweight='bold', fontsize=8)
+    fig.text(0.37, 0.95,'(B)', fontweight='bold', fontsize=8)
+    fig.text(0.64, 0.95,'(C)', fontweight='bold', fontsize=8)
     
     if save_figures:
         save_figure(fig, 'VTA_activity', width=2, ratio=0.65)
@@ -161,10 +212,14 @@ def plot_vta_peaks(nb_stim=2):
         ax.set_xlabel('Trial')
         if stim == 0:
             ax.set_ylabel('Amplitude of VTA bursts')
-        ax.plot(np.arange(len(CS[stim]))+1, CS[stim], color='green', label='CS')
+        ax.plot(np.arange(len(CS[stim]))+1, CS[stim], color='blue', label='CS')
         ax.plot(np.arange(len(US[stim]))+1, US[stim], color='red', label='US')
         if stim == 1:
             ax.legend(loc=2, frameon=False)
+    
+    fig.text(0.08, 0.95,'(A)', fontweight='bold', fontsize=8)
+    fig.text(0.37, 0.95,'(B)', fontweight='bold', fontsize=8)
+    fig.text(0.64, 0.95,'(C)', fontweight='bold', fontsize=8)
     
     if save_figures:
         save_figure(fig, 'VTA_peaks', width=2, ratio=0.35)
@@ -175,7 +230,7 @@ def plot_vta_peaks(nb_stim=2):
 def plot_bla(nb_stim=2):
     "Shows activity of the BLA cells during conditioning."
     def single_plot(data, ax):
-        ax.set_ylim((0., 1.3))
+        ax.set_ylim((0., 1.4))
         duration = data['duration']
         ticks = np.linspace(0, duration, int(duration/1000)+1)
         ax.set_xticks(ticks) 
@@ -192,16 +247,39 @@ def plot_bla(nb_stim=2):
         ax.set_title(title)
         if stim == 0:
             ax.set_ylabel('Trial 1')
-        single_plot(conditioning_trials[stim], ax)        
+        single_plot(conditioning_trials[stim], ax)  
+        if stim == 0:
+            ax.plot([1000, 4000], [1.3, 1.3], color='b', linestyle='-', linewidth=2)  
+            ax.plot([3000, 4000], [1.25, 1.25], color='r', linestyle='-', linewidth=2)   
+        if stim == 1:
+            ax.plot([1000, 5000], [1.3, 1.3], color='b', linestyle='-', linewidth=2) 
+            ax.plot([4000, 5000], [1.25, 1.25], color='r', linestyle='-', linewidth=2)  
+        if stim == 2:
+            ax.plot([1000, 6000], [1.3, 1.3], color='b', linestyle='-', linewidth=2) 
+            ax.plot([5000, 6000], [1.25, 1.25], color='r', linestyle='-', linewidth=2)       
 
         ax = axes[1, stim]
         if stim == 0:
             ax.set_ylabel('Trial 15')
         ax.set_xlabel('Time (s)')
         single_plot(conditioning_trials[14*nb_stim + stim], ax)
+        if stim == 0:
+            ax.plot([1000, 4000], [1.3, 1.3], color='b', linestyle='-', linewidth=2)  
+            ax.plot([3000, 4000], [1.25, 1.25], color='r', linestyle='-', linewidth=2)   
+        if stim == 1:
+            ax.plot([1000, 5000], [1.3, 1.3], color='b', linestyle='-', linewidth=2) 
+            ax.plot([4000, 5000], [1.25, 1.25], color='r', linestyle='-', linewidth=2)  
+        if stim == 2:
+            ax.plot([1000, 6000], [1.3, 1.3], color='b', linestyle='-', linewidth=2) 
+            ax.plot([5000, 6000], [1.25, 1.25], color='r', linestyle='-', linewidth=2)  
+            
+    
+    fig.text(0.08, 0.95,'(A)', fontweight='bold', fontsize=8)
+    fig.text(0.37, 0.95,'(B)', fontweight='bold', fontsize=8)
+    fig.text(0.64, 0.95,'(C)', fontweight='bold', fontsize=8)
     
     if save_figures:
-        save_figure(fig, 'BLA_activity', width=2, ratio=0.5)
+        save_figure(fig, 'BLA_activity', width=2, ratio=0.45)
     else:
         plt.show()
     plt.close()
