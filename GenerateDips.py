@@ -108,7 +108,7 @@ def plot_vta(nb_stim=2):
         ax.plot(np.arange(len(US[stim]))+1, US[stim], color='red', label='VTA')
         ax.plot(np.arange(len(nacc[stim]))+1, nacc[stim], color='blue', label='NAcc')
         if stim == 0:
-            ax.set_ylabel('VTA and NAcc during reward omission')
+            ax.set_ylabel('Activity at reward omission')
             ax.legend(loc=7, frameon=False)
     
     fig.text(0.08, 0.95,'(A)', fontweight='bold', fontsize=8)
@@ -116,7 +116,7 @@ def plot_vta(nb_stim=2):
     fig.text(0.64, 0.95,'(C)', fontweight='bold', fontsize=8)
     
     if save_figures:
-        save_figure(fig, 'VTA_dips', width=2, ratio=0.35)
+        save_figure(fig, 'VTA_dips', width=2, ratio=0.3)
     else:
         plt.show()
     plt.close()

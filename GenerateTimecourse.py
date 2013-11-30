@@ -84,6 +84,7 @@ def run_simulation(nb_stim=2, nb_valuation = 10, nb_conditioning = 15, nb_extinc
 
 def plot_vta(nb_stim=2):
     "Shows activity of the VTA cell during conditioning (similar to Schultz 1998)."
+    
     def single_plot(data, ax):
         dopa = np.array(data['VTA']['rate'][0])
         duration = len(dopa)
