@@ -3,15 +3,16 @@
 Test the sensitization phase
 """
 from TimingNetwork import *
+from TrialDefinition import *
 
 # Compile the network
 compile()
 
 # Perform 10 sensitization trials per US
 trial_setup = [
-    {'GUS': np.array([1., 1., 0., 0.]), 'duration': 1000},
-    {'GUS': np.array([1., 0., 1., 0.]), 'duration': 1000},
-    {'GUS': np.array([0., 0., 1., 1.]), 'duration': 1000}
+    {'GUS': np.array([1., 1., 0., 0.]), 'duration': 500},
+    {'GUS': np.array([1., 0., 1., 0.]), 'duration': 500},
+    {'GUS': np.array([0., 0., 1., 1.]), 'duration': 500}
 ]
 for trial in range(10):
     sensitization_trial(trial_setup)
