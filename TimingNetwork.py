@@ -1,630 +1,290 @@
-"""
-Control of dopaminergic firing during conditioning.
-"""
+# -*- coding: utf-8 -*-
+# Implementation in ANNarchy4 of the timing model presented in the Frontiers article
+ 
+from ANNarchy4 import *
+setup(dt = 1.0, suppress_warnings=True, show_time=False, verbose=False)
 
-import ANNarchy
-compiler=ANNarchy.Compiler()
-compiler.add_module_path(['./modules'])
-compiler.neurons = ['LinearNeuron',
-                    'DopamineNeuron',
-                    'GatedNeuron',
-                    'PhasicNeuron',
-                    'ModulatedPhasicNeuron',
-                    'OscillatorNeuron',
-                    'StriatalNeuron',
-                    'ShuntingExcitationNeuron']
-compiler.learning_rules = ['DA_Covariance',
-                           'CorticoStriatal',
-                           'DA_Copy',
-                           'AntiHebb',
-                           'Hebb']
-compiler.precision = 'double'
-compiler.openMP = False
-compiler.verbose= False
-#compiler.clean()
-compiler.build()
+# Import neuron and synapse definitions
+from NeuronDefinition import *
+from SynapseDefinition import *
+from ConnectorDefinition import *
 
-from ANNarchy.core import *
+############################
+# Parameters
+############################
+nb_gus = 4
+nb_vis = 3
+nb_bla = 6
+nb_nacc = 6
 
-class stripes(Projection):
-    ''' Connection pattern for vmPFC'''
-    def __init__(self, pre, post, connection_type, value, var_value=0.0, delay=0):
-        Projection.__init__(self, pre, post, connection_type)
-        self.value=value
-        self.var_value=var_value
-        self.delay=delay
+#############################
+# Creation of the populations
+#############################
 
-    def connect(self):
-        pre=self.net.population(self.pre)
-        post=self.net.population(self.post)
-        for rk in range(post.height):
-            for v in range(post.width):
-                ranks = [v]
-                values= [self.value + self.var_value * (2.*np.random.random()*1) ]
-                delays= [self.delay]
-                post.neuron(v, rk).connect((self.synapse)(None, 0), self.pre, vector_int(ranks), self.connection_type, vector_float(values), vector_int(delays) )
+# Gustatory inputs
+LH = Population(name='LH', geometry=nb_gus, neuron=LeakyNeuron)
 
-class TimingNetwork(Network):
-    '''Network for the learning of CS-US intervals.'''
-    def __init__(self):
-        Network.__init__(self)
-        # Parameters
-        self.noise = 0.1
-        # Number of neurons
-        self.nb_visual_inputs = 2
-        self.nb_gustatory_inputs = 4
-        self.nb_bla = 6
-        self.nb_visual = 3
-        self.nb_oscillators = 50
-        self.nb_nacc = 6
-        # Frequencies of the oscillators
-        self.min_freq = 2.0
-        self.max_freq = 8.0
+# Visual inputs
+VIS = Population(name='VIS', geometry=nb_vis, neuron=LeakyNeuron)
 
-    def build(self):
+# Inerotemporal cortex
+IT = Population(name='IT', geometry=(nb_vis, nb_vis), neuron=LeakyNeuron)
 
-        self.create_populations()
-        self.connect_populations()
+# Basolateral amygdala
+BLA = Population(name='BLA', geometry=(nb_bla, nb_bla), neuron=ShuntingPhasicNeuron)
+BLA.tau_adaptation = 500.0
+BLA.K_adaptation = 0.8
 
-    def create_populations(self):
+# Central nucleus of the amygdala
+CE = Population(name='CE', geometry=1, neuron=LeakyNeuron)
 
-        #######################
-        # Inputs
-        #######################
+# Pedunculopontine nucleus
+PPTN_US = Population(name='PPTN_US', geometry=1, neuron=PhasicNeuron)
+PPTN_US.tau_adaptation = 50.0
+PPTN_US.K_adaptation = 1.0
+PPTN_CS = Population(name='PPTN_CS', geometry=1, neuron=PhasicNeuron)
+PPTN_CS.tau_adaptation = 50.0
+PPTN_CS.K_adaptation = 1.0
 
-        # Visual Input
-        self.add(name="VIS", width=self.nb_visual_inputs,
-                 neuron=LinearNeuron)
-        self.population("VIS").set_parameters({
-            'tau': 10.0,
-            'threshold': 0.0,
-            'noise': self.noise
-        })
+# Ventral tegmental area
+VTA = Population(name='VTA', geometry=1, neuron=DopamineNeuron)
+VTA.tau = 30.0
+VTA.baseline = 0.2
+VTA.tau_decrease = 30.0
+VTA.tau_modulation = 300.0
 
-        # Gustatory Input
-        self.add(name="GUS", width=self.nb_gustatory_inputs,
-                 neuron=LinearNeuron)
-        self.population("GUS").set_parameters({
-            'tau': 10.0,
-            'noise': 0.0,
-            'threshold': 0.0,
-            'noise': self.noise
-        })
+# Cortical oscillators in ventromedial prefrontal cortex
+vmPFC = Population(name='vmPFC', geometry=(50, nb_vis), neuron=OscillatorNeuron)
+vmPFC.freq = np.random.uniform(2.0, 8.0, size=vmPFC.geometry)
+vmPFC.phase = np.random.uniform(0.0, np.pi, size=vmPFC.geometry)
 
-        # Drive inputs
-        self.add(name="DRIVE", width=self.nb_gustatory_inputs,
-                 neuron=LinearNeuron)
-        self.population("DRIVE").set_parameters({
-            'tau': 10.0,
-            'noise': 0.0,
-            'threshold': 0.0,
-            'noise': self.noise
-        })
-        self.population("DRIVE").set_variables({
-            'baseline': 1.0
-        })
+# Nucleus accumbens
+NAcc = Population(name='NAcc', geometry=(nb_nacc, nb_nacc), neuron=StriatalNeuron)
+
+# Ventral Pallidum 
+VP = Population(name='VP', geometry=1, neuron=ShuntingNeuron)
+VP.baseline = 0.5
+
+# Rostromedial tegmental nucleus
+RMTg = Population(name='RMTg', geometry=1, neuron=LeakyNeuron)
+RMTg.description['variables'][2]['bounds']['max'] = 1.1
+
+# Lateral Habenula
+LHb = Population(name='LHb', geometry=1, neuron=LeakyNeuron)
+LHb.baseline = 1.0
+LHb.description['variables'][2]['bounds']['max'] = 1.1
+
+
+#############################
+# Creation of the projections
+#############################
+
+# Visual inputs
+VIS_IT = Projection(
+    pre = VIS,
+    post = IT,
+    target = 'exc'
+).connect_with_func(method=connect_cluster, weight=1.0, number=3)
+
+# Visual inputs to vmPFC
+VIS_vmPFC = Projection(
+    pre = VIS,
+    post = vmPFC,
+    target = 'exc'
+).connect_with_func(method=connect_stripes, weight=1.0)
+
+# Projections to the amygdala
+LH_BLA = Projection(
+    pre = LH,
+    post = BLA,
+    target = 'exc',
+    synapse = DACovariance
+).connect_all_to_all(weights=Uniform(0.2, 0.4))
+
+IT_BLA = Projection(
+    pre = IT,
+    post = BLA,
+    target = 'mod',
+    synapse = DAShuntingCovariance
+).connect_all_to_all(weights=0.0)
+
+BLA_BLA = Projection(
+    pre = BLA,
+    post = BLA,
+    target = 'inh',
+    synapse = AntiHebb
+).connect_all_to_all(weights=0.5)
+
+BLA_CE = Projection(
+    pre = BLA,
+    post = CE,
+    target = 'exc'
+).connect_all_to_all(weights=1.0)
+
+VTA_BLA = Projection(
+    pre = VTA,
+    post = BLA,
+    target = 'dopa'
+).connect_all_to_all(weights=1.0)
+
+# Projections to VTA
+
+LH_PPTN_US = Projection(
+    pre = LH,
+    post = PPTN_US,
+    target = 'exc'
+).connect_all_to_all(weights=0.75)
+
+CE_PPTN_CS = Projection(
+    pre = CE,
+    post = PPTN_CS,
+    target = 'exc'
+).connect_all_to_all(weights=1.3)
+
+PPTN_US_VTA = Projection(
+    pre = PPTN_US,
+    post = VTA,
+    target = 'exc'
+).connect_all_to_all(weights=1.5)
+
+PPTN_CS_VTA = Projection(
+    pre = PPTN_CS,
+    post = VTA,
+    target = 'exc'
+).connect_all_to_all(weights=1.5)
+
+PPTN_PPTN = Projection(
+    pre = PPTN_US,
+    post = PPTN_CS,
+    target = 'inh'
+).connect_all_to_all(weights=2.0)
+
+NAcc_VTA = Projection(
+    pre = NAcc,
+    post = VTA,
+    target = 'mod',
+    synapse = Hebb
+).connect_all_to_all(weights=0.0)
+
+
+# Projections to NAcc
+
+BLA_NAcc = Projection(
+    pre = BLA,
+    post = NAcc,
+    target = 'exc'
+).connect_one_to_one(weights=0.2)
+
+VTA_NAcc = Projection(
+    pre = VTA,
+    post = NAcc,
+    target = 'dopa'
+).connect_all_to_all(weights=1.0)
+
+
+NAcc_NAcc = Projection(
+    pre = NAcc,
+    post = NAcc,
+    target = 'inh',
+    synapse = AntiHebb
+).connect_all_to_all(weights=0.5)
+NAcc_NAcc.tau = 1000.0  
+
+vmPFC_NAcc = Projection(
+    pre = vmPFC,
+    post = NAcc,
+    target = 'mod',
+    synapse = DACovariance
+).connect_all_to_all(weights=0.0)
+vmPFC_NAcc.eta = 50.0
+vmPFC_NAcc.tau_alpha = 10.0 
+vmPFC_NAcc.tau_dopa = 10.0
+vmPFC_NAcc.K_alpha = 10.0
+vmPFC_NAcc.K_LTD = 10.0
+vmPFC_NAcc.dopa_threshold_LTP = 0.3
+vmPFC_NAcc.dopa_K_LTP = 5.0
+vmPFC_NAcc.description['variables'][3]['bounds']['min'] = -0.2 # TODO!!!
+
+# Projections within the ventral BG
+
+PPTN_US_VP = Projection(
+    pre = PPTN_US,
+    post = VP,
+    target = 'exc'
+).connect_all_to_all(weights=0.5)
+
+PPTN_CS_VP = Projection(
+    pre = PPTN_CS,
+    post = VP,
+    target = 'exc'
+).connect_all_to_all(weights=0.5)
+
+NAcc_VP = Projection(
+    pre = NAcc,
+    post = VP,
+    target = 'inh',
+    synapse = Hebb
+).connect_all_to_all(weights=0.0)
+NAcc_VP.eta = 100.0
+NAcc_VP.threshold_pre = 0.0
+NAcc_VP.threshold_post = 0.5
+NAcc_VP.description['variables'][0]['bounds']['max'] = 2.0
+
+VP_RMTg = Projection(
+    pre = VP,
+    post = RMTg,
+    target = 'inh'
+).connect_all_to_all(weights=1.0)
+
+VP_LHb = Projection(
+    pre = VP,
+    post = LHb,
+    target = 'inh'
+).connect_all_to_all(weights=3.0)
         
-        #######################
-        # Cerebral cortex
-        #######################
+LHb_RMTg = Projection(
+    pre = LHb,
+    post = RMTg,
+    target = 'exc'
+).connect_all_to_all(weights=1.5)
+
+RMTg_VTA = Projection(
+    pre = RMTg,
+    post = VTA,
+    target = 'inh'
+).connect_all_to_all(weights=1.0)
+
+
+#############################
+# Main loop
+#############################
+if __name__ == '__main__':
+    # Compile the network
+    compile()
+    
+    from TrialDefinition import *
+    
+    print 'Start sensitization'
+    # Perform 10 sensitization trials per US
+    trial_setup = [
+        {'GUS': np.array([1., 1., 0., 0.]), 'duration': 500},
+        {'GUS': np.array([1., 0., 1., 0.]), 'duration': 500},
+        {'GUS': np.array([0., 0., 1., 1.]), 'duration': 500}
+    ]
+    for trial in range(10):
+        sensitization_trial(trial_setup)
+    
+    # Stop learning in the LH->BLA pathway
+    LH_BLA.eta = 1000000.0  
+    
+    print 'Start conditioning'
+    # Perform 10 conditioning trials per association
+    trial_setup = [
+        {'GUS': np.array([1., 1., 0., 0.]), 'VIS': np.array([1., 0., 0.]), 'magnitude': 0.8, 'duration': 2000},
+        {'GUS': np.array([1., 0., 1., 0.]), 'VIS': np.array([0., 1., 0.]), 'magnitude': 0.5, 'duration': 3000},
+        {'GUS': np.array([0., 0., 1., 1.]), 'VIS': np.array([0., 0., 1.]), 'magnitude': 1.0, 'duration': 4000}
+    ]
+    for trial in range(10):
+        conditioning_trial(trial_setup)
         
-        # IT representation of visual inputs
-        self.add(name="IT", width=self.nb_visual, height=self.nb_visual,
-                 neuron=LinearNeuron)
-        self.population("IT").set_parameters({
-            'tau': 10.0,
-            'noise': 0.2,
-            'threshold': 0.0 ,
-            'noise': self.noise
-        })
-
-#        # OFC for representation of incentive value
-#        self.add(name="OFC", width=self.nb_bla, height=self.nb_bla,
-#                 neuron=ModulatedPhasicNeuron)
-#        self.population("OFC").set_parameters({
-#            'tau': 10.0,
-#            'noise': self.noise,
-#            'fb_mod': 0.0,
-#            'fb_exc': 1.0,
-#            'tau_adaptation': 50000.0
-#        })
-#        self.population("OFC").set_variables({
-#            'baseline': 0.0
-#        })
-        
-        
-        # Ventromedial prefrontal cortex for the oscillations
-        self.add(name="vmPFC", width=self.nb_visual_inputs, height=self.nb_oscillators,
-                 neuron=OscillatorNeuron)
-        self.population("vmPFC").set_parameters({
-            'tau': 1.0,
-            'noise': 0.0,
-            'start_oscillate': 0.8,
-            'stop_oscillate': 0.2
-        })
-        self.population("vmPFC").set_variables({
-            'freq': self.min_freq + (self.max_freq- self.min_freq)* np.random.random(self.population("vmPFC").geometry),
-            'phase': np.pi * np.random.random(self.population("vmPFC").geometry)
-        })
-
-        #######################
-        # Lateral hypothalamus
-        #######################
-
-        # ON channel
-        self.add(name="LH", width=self.nb_gustatory_inputs,
-                 neuron=GatedNeuron)
-        self.population("LH").set_parameters({
-            'tau': 10.0,
-            'noise': self.noise,
-            'threshold': 0.0,
-#            'tau_adaptation_input': 2000.0,
-#            'tau_adaptation_drive': 400.0,
-#            'tau_adaptation_rate': 200.0
-        })
-        self.population("LH").set_variables({ 'baseline': 0.0 })
-
-
-        #######################
-        # Amygdala
-        #######################
-
-        # BLA
-        self.add(name="BLA", width=self.nb_bla, height=self.nb_bla,
-                 neuron=ModulatedPhasicNeuron)
-        self.population("BLA").set_parameters({
-            'tau': 10.0,
-            'noise': self.noise,
-            'fb_mod': 0.8,
-            'fb_exc': 1.0,
-            'tau_adaptation': 500.0
-        })
-        self.population("BLA").set_variables({
-            'baseline': 0.0
-        })
-
-        # CE
-        self.add(name="CE", width=1,
-                 neuron=LinearNeuron)
-        self.population("CE").set_parameters({
-            'tau': 10.0,
-            'noise': self.noise,
-            'threshold': 0.0
-        })
-        self.population("CE").set_variables({
-            'baseline': 0.0
-        })
-
-        #######################
-        # Basal Ganglia
-        #######################
-
-        # Nucleus accumbens
-        self.add(name="NAcc", width=self.nb_nacc, height=self.nb_nacc,
-                 neuron=StriatalNeuron)
-        self.population("NAcc").set_parameters({
-            'tau': 10.0,
-            'noise': self.noise,
-            'threshold': 0.0,
-            'membrane_up': 0.5,
-            'tau_state': 400.0,
-            'threshold_exc': 1.0,
-            'threshold_dopa': 0.4
-        })
-        self.population("NAcc").set_variables({
-            'baseline': -0.9
-        })
-        
-        # Ventral Pallidum
-        self.add(name="VP", width=1,
-                 neuron=ShuntingExcitationNeuron)
-        self.population("VP").set_parameters({
-            'tau': 10.0,
-            'noise': self.noise
-        })
-        self.population("VP").set_variables({
-            'baseline': 0.5
-        })
-
-        #####################
-        # Dopamine cells
-        #####################
-
-        # DA neurons in VTA
-        self.add(name="VTA", width=1,
-                 neuron=DopamineNeuron)
-        self.population("VTA").set_parameters({
-            'tau': 30.0,
-            'tau_decrease': 30.0,
-            'tau_modulation': 300.0,
-            'noise': self.noise,
-            'threshold': 0.0,
-            'max_rate': 1.2
-        })
-        self.population("VTA").set_variables({
-            'baseline': 0.2
-        })
-
-
-        # Rostromedial tegmental nucleus
-        self.add(name="RMTg", width=1,
-                 neuron=LinearNeuron)
-        self.population("RMTg").set_parameters({
-            'tau': 10.0,
-            'noise': self.noise,
-            'threshold': 0.0, # was 0.5
-            'max_rate': 1.1
-        })
-        self.population("RMTg").set_variables({
-            'baseline': 0.0
-        })
-
-        # Lateral Habenula
-        self.add(name="LHb", width=1,
-                 neuron=LinearNeuron)
-        self.population("LHb").set_parameters({
-            'tau': 10.0,
-            'noise': self.noise,
-            'threshold': 0.0,
-            'max_rate': 1.1
-        })
-        self.population("LHb").set_variables({
-            'baseline': 1.0
-        })
-
-        # Pedunculopontine nucleus
-        self.add(name="PPTN_CS", width=1,
-                 neuron=PhasicNeuron)
-        self.population("PPTN_CS").set_parameters({
-            'tau': 10.0,
-            'noise': self.noise,
-            'tau_adaptation': 50.0
-        })
-        self.population("PPTN_CS").set_variables({
-            'baseline': 0.0
-        })
-        self.add(name="PPTN_US", width=1,
-                 neuron=PhasicNeuron)
-        self.population("PPTN_US").set_parameters({
-            'tau': 10.0, # was 10.0
-            'noise': self.noise,
-            'tau_adaptation': 50.0
-        })
-        self.population("PPTN_US").set_variables({
-            'baseline': 0.0
-        })
-
-    def connect_populations(self):
-
-        #######################
-        # INPUTS
-        #######################
-
-        # Visual inputs to IT
-        self.connect(stripes(pre="VIS", post="IT", connection_type="exc",
-                            value=1.0, delay=0 ) )
-                                      
-        # Visual input to vmPFC
-        self.connect(stripes(pre="VIS", post="vmPFC", connection_type="exc",
-                             value=1.0, delay=0))
-
-
-        #######################
-        # PPTN
-        #######################
-                              
-        # Gustatory input to PPTN
-        self.connect(all2all(pre="LH", post="PPTN_US", connection_type="exc",
-                             value=0.75 ))
-        # CE -> PPTN, exc
-        self.connect(all2all(pre="CE", post="PPTN_CS", connection_type="exc",
-                             value=1.3) )
-        # PPTN <-> PPTN, inh
-        self.connect(all2all(pre="PPTN_US", post="PPTN_CS", connection_type="inh",
-                             value=2.0, delay=0) )
-        # PPTN -> VTA, exc
-        self.connect(all2all(pre="PPTN_US", post="VTA", connection_type="exc",
-                             value=1.5, delay=0) )
-        self.connect(all2all(pre="PPTN_CS", post="VTA", connection_type="exc",
-                             value=1.5, delay=0) )
-
-
-        #######################
-        # VTA and RMTg
-        #######################
-        # PPTN -> VP, exc
-        self.connect(all2all(pre="PPTN_US", post="VP", connection_type="exc",
-                             value=0.5, delay=0))
-        self.connect(all2all(pre="PPTN_CS", post="VP", connection_type="exc",
-                             value=0.5, delay=0))
-        # VP -> RMTg, inh
-        self.connect(all2all(pre="VP", post="RMTg", connection_type="inh",
-                             value=1.0, delay=0))
-        # VP -> LHb, inh
-        self.connect(all2all(pre="VP", post="LHb", connection_type="inh",
-                             value=3.0, delay=0))
-
-        # LHb -> RMTg, exc
-        self.connect(all2all(pre="LHb", post="RMTg", connection_type="exc",
-                             value=1.5, delay=0))
-
-        # RMTg -> VTA, inh
-        self.connect(all2all(pre="RMTg", post="VTA", connection_type="inh",
-                             value=1.0, delay=0))
-
-
-        #######################
-        # Lateral hypothalamus
-        #######################
-
-        # Gustatory input to the ON channel
-        self.connect(one2one(pre="GUS", post="LH", connection_type="exc",
-                             value=1.0, delay=0))
-        # Drive to the ON channel
-        self.connect(one2one(pre="DRIVE", post="LH", connection_type="drive",
-                             value=1.0, delay=0))
-
-        #######################
-        # Amygdala
-        #######################
-
-        # DA to BLA, dopa
-        self.connect(all2all(pre="VTA", post="BLA", connection_type="dopa",
-                             value=1.0,  delay=0) )
-
-        # LH to BLA, exc (US)
-        proj = self.connect(fixed_number_pre(pre="LH", post="BLA", connection_type="exc",
-                                    value=0.3, var_value= 0.1, number=2, delay=0),
-                            learning_rule=DA_Covariance )
-        proj.set_learning_parameters({
-            'tau': 100.0,
-            'min_value': 0.0,
-            'K_LTD': 1.0,
-            'K_alpha': 5.0,
-            'tau_dopa': 300.0,
-            'tau_alpha': 1.0,
-            'regularization_threshold': 1.0,
-            'DA_threshold_positive': 0.3,
-            'DA_threshold_negative': 0.1,
-            'DA_K_positive': 10.0,
-            'DA_K_negative': 0.0
-        })
-
-        # IT to BLA, mod (CS)
-        proj = self.connect(all2all(pre="IT", post="BLA", connection_type="mod",
-                                    value=0.0, delay=0),
-                            learning_rule=DA_Copy )
-        proj.set_learning_parameters({
-            'tau': 2000.0,
-            'min_value': 0.0,
-            #'K_alpha': 1.0,
-            'K_LTD': 5.0,
-            #'tau_alpha': 1.0,
-            'tau_dopa': 300.0,
-            #'regularization_threshold': 1.0,
-            'DA_threshold_positive': 0.3,
-            'DA_threshold_negative': 0.1,
-            'DA_K_positive': 4.0,
-            'DA_K_negative': 1.0
-        })
-
-        # Competition in BLA, inh
-        proj = self.connect(all2all(pre="BLA", post="BLA", connection_type="inh",
-                                    value=0.5, var_value= 0.0, delay=0),
-                            learning_rule=AntiHebb )
-        proj.set_learning_parameters({
-            'tau': 100.0,
-            'theta': 0.00,
-            'min_value': 0.0,
-            'max_value': 3.0
-        })
-
-        # BLA to CE, exc
-        self.connect(all2all(pre="BLA", post="CE", connection_type="exc",
-                             value=1.0, delay=0))
-
-
-        #######################
-        # Basal Ganglia
-        #######################
-
-        # Dopaminergic modulation of NAcc
-        self.connect(all2all(pre="VTA", post="NAcc", connection_type="dopa",
-                             value=1.0, delay=0))
-
-        # Competition in NAcc
-        proj = self.connect(all2all(pre="NAcc", post="NAcc", connection_type="inh",
-                             value=0.5, delay=0),
-                             learning_rule=AntiHebb )
-        proj.set_learning_parameters({
-            'tau': 1000.0,
-            'theta': 0.0,
-            'min_value': 0.0,
-            'max_value': 1.0
-        })
-
-
-        # BLA -> NAcc
-        proj = self.connect(one2one(pre="BLA", post="NAcc", connection_type="exc",
-                             value=0.2, delay=0))
-
-        # Timing information from vmPFC to NAcc
-        proj = self.connect(all2all(pre="vmPFC", post="NAcc", connection_type="mod",
-                                    value=0.0, var_value=0.0,  delay=0),
-                            learning_rule=DA_Covariance)
-        proj.set_learning_parameters({
-            'tau': 50.0,
-            'K_LTD': 10.0,
-            'min_value': -0.2,
-            'K_alpha': 10.0,
-            'tau_alpha': 10.0,
-            'tau_dopa': 10.0,
-            'regularization_threshold': 1.0,
-            'DA_threshold_positive': 0.3,
-            'DA_threshold_negative': 0.1,
-            'DA_K_positive': 5.0,
-            'DA_K_negative': 1.0
-        })
-
-        # Inhibitory projection from NAcc to VP
-        proj = self.connect(all2all(pre="NAcc", post="VP", connection_type="inh",
-                                    value=0.0, var_value=0.0, delay=0),
-                            learning_rule=Hebb)
-        proj.set_learning_parameters({
-            'tau': 100.0,
-            'min_value': 0.0,
-            'max_value': 2.0,
-            'threshold_pre' : 0.0,
-            'threshold_post' : 0.5,
-        })
-
-        # NAcc -> VTA, mod
-        proj = self.connect(all2all(pre="NAcc", post="VTA", connection_type="mod",
-                                    value=0.0, var_value=0.0, delay=0),
-                            learning_rule = Hebb )
-        proj.set_learning_parameters({
-            'tau': 500.0,
-            'min_value': 0.0,
-            'max_value': 20.0,
-            'threshold_pre' : 0.0,
-            'threshold_post' : 0.0
-        })
-        
-
-#######################
-# Methods for learning
-#######################
-
-# Define the stimuli
-CS_US = { '1': {'visual': 0,
-                'vector': [1.0, 1.0, 0.0, 0.0],
-                'magnitude': 0.8,
-                'duration': 2000 },
-          '2': {'visual': 1,
-                'vector': [1.0, 0.0, 1.0, 0.0],
-                'magnitude': 0.5,
-                'duration': 3000 },
-          '3': {'visual': 2,
-                'vector': [0.0, 0.0, 1.0, 1.0],
-                'magnitude': 1.0,
-                'duration': 4000 }
-        }
-              
-US_duration = 1000
-sooner_duration = 1000
-
-# Habituate the network to gustatory inputs
-def valuation_trial(net, US=None, stimulus=None):
-    # Reset the network for 500ms
-    for neur in net.population('GUS'):
-        neur.baseline = 0.0
-    net.execute(500)
-    # Select the US 
-    if US: # US integer is provided
-        GUS = CS_US[str(US)]['vector']
-    else: # use defined stimulus
-        GUS = stimulus['vector']
-    #print 'Valuation: ', GUS
-    # Let the network learn for 1s
-    net.population('GUS').set_variables({'baseline': GUS})
-    net.execute(US_duration)
-    # Reset the network for 500ms
-    for neur in net.population('GUS'):
-        neur.baseline = 0.0
-    net.execute(500)
-
-# Perform timed conditioning
-def conditioning_trial(net, CS=None, stimulus=None):
-    # Reset for 1s
-    for neur in net.population('VIS'):
-        neur.baseline = 0.0
-    for neur in net.population('GUS'):
-        neur.baseline = 0.0
-    net.execute(1000)
-    # Select the CS 
-    VIS =np.zeros(net.nb_visual_inputs)
-    if CS: # integer
-        VIS[CS_US[str(CS)]['visual']] = 1.0
-        GUS = [CS_US[str(CS)]['magnitude']* i for i in CS_US[str(CS)]['vector'] ]
-        duration = CS_US[str(CS)]['duration']
-    else: # hand-crafted stimulus
-        VIS[stimulus['visual']] = 1.0
-        GUS = [stimulus['magnitude']* i for i in stimulus['vector'] ]
-        duration = stimulus['duration']
-    #print 'Conditioning: ', VIS, GUS
-    # Present CS1 for 2s, CS2 for 3s
-    net.population('VIS').set_variables({'baseline': VIS})
-    net.execute(duration)
-    # Present the US for 1s
-    net.population('GUS').set_variables({'baseline': GUS})
-    net.execute(US_duration)
-    # Reset for 1s
-    for neur in net.population('VIS'):
-        neur.baseline = 0.0
-    for neur in net.population('GUS'):
-        neur.baseline = 0.0
-    net.execute(1000)
-
-# Extinction
-def extinction_trial(net, CS=None, stimulus=None):
-    # Reset for 1s
-    for neur in net.population('VIS'):
-        neur.baseline = 0.0
-    for neur in net.population('GUS'):
-        neur.baseline = 0.0
-    net.execute(1000)
-    # Select the CS 
-    VIS =np.zeros(net.nb_visual_inputs)
-    if CS: # integer
-        VIS[CS_US[str(CS)]['visual']] = 1.0
-        GUS = [CS_US[str(CS)]['magnitude']* i for i in CS_US[str(CS)]['vector'] ]
-        duration = CS_US[str(CS)]['duration']
-    else: # hand-crafted stimulus
-        VIS[stimulus['visual']] = 1.0
-        GUS = [stimulus['magnitude']* i for i in stimulus['vector'] ]
-        duration = stimulus['duration']
-    print 'Extinction: ', VIS, GUS
-    # Present CS1 for 2s, CS2 for 3s
-    net.population('VIS').set_variables({'baseline': VIS})
-    net.execute(duration)
-    # DO NOT Present the US for 1s
-    #net.population('GUS').set_variables({'baseline': GUS})
-    net.execute(US_duration)
-    # Reset for 1s
-    for neur in net.population('VIS'):
-        neur.baseline = 0.0
-    for neur in net.population('GUS'):
-        neur.baseline = 0.0
-    net.execute(1000)
-
-# Reward is delivered sooner than expected
-def sooner_trial(net, CS=None, stimulus=None):
-    # Reset for 1s
-    for neur in net.population('VIS'):
-        neur.baseline = 0.0
-    for neur in net.population('GUS'):
-        neur.baseline = 0.0
-    net.execute(1000)
-    # Select the CS 
-    VIS =np.zeros(net.nb_visual_inputs)
-    if CS: # integer
-        VIS[CS_US[str(CS)]['visual']] = 1.0
-        GUS = [CS_US[str(CS)]['magnitude']* i for i in CS_US[str(CS)]['vector'] ]
-        duration = CS_US[str(CS)]['duration']
-    else: # hand-crafted stimulus
-        VIS[stimulus['visual']] = 1.0
-        GUS = [stimulus['magnitude']* i for i in stimulus['vector'] ]
-        duration = stimulus['duration']
-    print 'Sooner reward: ', VIS, GUS
-    # Present CS1 for 1s, CS2 for 2s: sooner than what was learned
-    net.population('VIS').set_variables({'baseline': VIS})
-    net.execute(duration - sooner_duration)
-    # Present the US for 1s
-    net.population('GUS').set_variables({'baseline': GUS})
-    net.execute(US_duration)
-    # Reset for 1s
-    for neur in net.population('VIS'):
-        neur.baseline = 0.0
-    for neur in net.population('GUS'):
-        neur.baseline = 0.0
-    net.execute(1000 + sooner_duration) # To compensate
+    print 'Finished'
