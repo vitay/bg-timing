@@ -29,11 +29,11 @@ DACovariance = Synapse(
     dopa_threshold_LTP = 0.3,
     dopa_K_LTP = 10.0,
     alpha = Variable(init=0.0, eq="tau_alpha * dalpha/dt + alpha = pos(post.rate - 1.0)"),
-    dopa_mean = Variable(init=0.0, eq="tau_dopa*ddopa_mean/dt + dopa_mean = post.dopa"),
+    dopa_mean = Variable(init=0.0, eq="tau_dopa*ddopa_mean/dt + dopa_mean = post.sum(dopa)"),
     dopa = Variable(init=0.0, eq="""
-        dopa = if post.dopa > dopa_threshold_LTP
+        dopa = if post.sum(dopa) > dopa_threshold_LTP
                then 
-                    dopa_K_LTP * pos( post.dopa - dopa_mean )
+                    dopa_K_LTP * pos( post.sum(dopa) - dopa_mean )
                else
                     0.0
     """),
@@ -60,7 +60,7 @@ DAShuntingCovariance = Synapse(
     dopa_threshold_LTP = 0.3,
     dopa_K_LTP = 4.0,
     dopa = Variable(init=0.0, eq="""
-        dopa = if post.dopa > dopa_threshold_LTP
+        dopa = if post.sum(dopa) > dopa_threshold_LTP
                then 
                     dopa_K_LTP
                else
@@ -69,7 +69,7 @@ DAShuntingCovariance = Synapse(
     value = Variable(eq="""
     eta * dvalue/dt = if (pre.rate > mean(pre.rate) and post.rate > mean(post.rate) ) 
                       then 
-                        dopa * (pre.rate - mean(pre.rate) ) * (post.rate - mean(post.rate)) * pos(post.sum_exc - post.sum_mod)
+                        dopa * (pre.rate - mean(pre.rate) ) * (post.rate - mean(post.rate)) * pos(post.sum(exc) - post.sum(mod))
                       else 
                         ( if (pre.rate > mean(pre.rate) or post.rate > mean(post.rate) )
                           then

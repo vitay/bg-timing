@@ -2,7 +2,7 @@
 # Implementation in ANNarchy4 of the timing model presented in the Frontiers article
  
 from ANNarchy4 import *
-setup(suppress_warnings=True)
+setup(suppress_warnings=True, show_time=False, verbose=False)
 
 # Import neuron and synapse definitions
 from NeuronDefinition import *

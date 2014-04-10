@@ -5,10 +5,6 @@ class Cluster(Connector):
     """
     def __init__(self, weights, delays=0, **parameters):
         
-#        self.weights = weights
-#        self.delays = delays
-#        self.parameters = parameters
-        
         Connector.__init__(self, weights, delays, **parameters)
         
     def connect(self):

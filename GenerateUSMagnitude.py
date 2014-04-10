@@ -34,6 +34,7 @@ def run_simulation(nb_magnitude=10, nb_valuation = 10, nb_conditioning = 15, nb_
     "Trains the network on the conditioning task for different US magnitudes"
     
     for magnitude in range(nb_magnitude):
+        print '.'
         # Create the network
         net = TimingNetwork()
         net.nb_visual_inputs = 2
@@ -124,13 +125,26 @@ def analyse_bla(data, pop):
         CS.append(np.max(vals[900:1100]))
         US.append(np.max(vals[2900:3100]))
     return CS, US 
+
+def errorfill(x, y, yerr, color=None, alpha_fill=0.3, ax=None):
+    ax = ax if ax is not None else plt.gca()
+    if color is None:
+        color = ax._get_lines.color_cycle.next()
+    if np.isscalar(yerr) or len(yerr) == len(y):
+        ymin = y - yerr
+        ymax = y + yerr
+    elif len(yerr) == 2:
+        ymin, ymax = yerr
+    ax.plot(x, y, color=color)
+    ax.fill_between(x, ymax, ymin, color=color, alpha=alpha_fill)
     
 if __name__=='__main__':
 
     bla = [[], [], [], []]
     vta = [[], [], [], []]
-    
+
     for n in range(10):
+        print '\nRun', n
         # Run the simulation
         run_simulation(nb_magnitude=11, record=recorded_areas)
         
@@ -153,18 +167,23 @@ if __name__=='__main__':
         # Reset recordings
         first_trials = []
         last_trials = []
-        
-    # Compute the mean
-    bla_mean=[]
-    bla_mean.append(np.mean(bla[0], axis=0))
-    bla_mean.append(np.mean(bla[1], axis=0))
-    bla_mean.append(np.mean(bla[2], axis=0))
-    bla_mean.append(np.mean(bla[3], axis=0))
-    vta_mean=[]
-    vta_mean.append(np.mean(vta[0], axis=0))
-    vta_mean.append(np.mean(vta[1], axis=0))
-    vta_mean.append(np.mean(vta[2], axis=0))
-    vta_mean.append(np.mean(vta[3], axis=0))
     
-    # Do the plot
-    plot_evolution(bla_mean, vta_mean, nb_magnitude=11)
+    # Save the recordings
+    import cPickle
+    cPickle.dump(bla, open('bla.data', 'w')) 
+    cPickle.dump(vta, open('vta.data', 'w'))     
+        
+#    # Compute the mean
+#    bla_mean=[]
+#    bla_mean.append(np.mean(bla[0], axis=0))
+#    bla_mean.append(np.mean(bla[1], axis=0))
+#    bla_mean.append(np.mean(bla[2], axis=0))
+#    bla_mean.append(np.mean(bla[3], axis=0))
+#    vta_mean=[]
+#    vta_mean.append(np.mean(vta[0], axis=0))
+#    vta_mean.append(np.mean(vta[1], axis=0))
+#    vta_mean.append(np.mean(vta[2], axis=0))
+#    vta_mean.append(np.mean(vta[3], axis=0))
+#    
+#    # Do the plot
+#    plot_evolution(bla_mean, vta_mean, nb_magnitude=11)

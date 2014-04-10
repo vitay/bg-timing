@@ -20,6 +20,7 @@ compiler.learning_rules = ['DA_Covariance',
                            'Hebb']
 compiler.precision = 'double'
 compiler.openMP = False
+compiler.verbose= False
 #compiler.clean()
 compiler.build()
 
@@ -523,7 +524,7 @@ def valuation_trial(net, US=None, stimulus=None):
         GUS = CS_US[str(US)]['vector']
     else: # use defined stimulus
         GUS = stimulus['vector']
-    print 'Valuation: ', GUS
+    #print 'Valuation: ', GUS
     # Let the network learn for 1s
     net.population('GUS').set_variables({'baseline': GUS})
     net.execute(US_duration)
@@ -550,7 +551,7 @@ def conditioning_trial(net, CS=None, stimulus=None):
         VIS[stimulus['visual']] = 1.0
         GUS = [stimulus['magnitude']* i for i in stimulus['vector'] ]
         duration = stimulus['duration']
-    print 'Conditioning: ', VIS, GUS
+    #print 'Conditioning: ', VIS, GUS
     # Present CS1 for 2s, CS2 for 3s
     net.population('VIS').set_variables({'baseline': VIS})
     net.execute(duration)
