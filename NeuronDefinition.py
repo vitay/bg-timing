@@ -1,4 +1,4 @@
-from ANNarchy4 import *
+from ANNarchy import *
 
 ############################
 # Definition of the neurons
@@ -13,7 +13,7 @@ LeakyNeuron = RateNeuron(
     equations = """
     noise = Uniform(-0.1, 0.1)
     tau*dmp/dt + mp = sum(exc) - sum(inh) + baseline + noise
-    rate = pos(mp) : max=2.0
+    r = pos(mp) : max=2.0
     """
 )
 
@@ -29,7 +29,7 @@ PhasicNeuron = RateNeuron(
     noise = Uniform(-0.1, 0.1)
     tau_adaptation * dadapted_exc/dt + adapted_exc =  sum(exc) 
     tau*dmp/dt + mp =  pos(sum(exc) - K_adaptation * adapted_exc) - sum(inh) + noise
-    rate = pos(mp)
+    r = pos(mp)
     """
 )
 
@@ -43,7 +43,7 @@ ShuntingNeuron = RateNeuron(
     noise = Uniform(-0.1, 0.1)
     inhibition = if sum(exc) < 0.1: sum(inh) else : 0.0
     tau*dmp/dt + mp =  sum(exc) - inhibition + baseline + noise
-    rate = pos(mp)
+    r = pos(mp)
     """
 )
 
@@ -65,7 +65,7 @@ ShuntingPhasicNeuron = RateNeuron(
     tau*dmp/dt + mp =   pos(sum(exc) - K_adaptation * adapted_exc)
         + pos(g_mod - K_adaptation * adapted_mod) * has_exc 
         - sum(inh) + noise
-    rate = pos(mp)
+    r = pos(mp)
     """
 )
 
@@ -91,7 +91,7 @@ OscillatorNeuron = RateNeuron(
                 time + 1 
            else:
                 0  : int, init=0 
-    rate = if oscillating > 0 : 
+    r = if oscillating > 0 : 
             (1.0 - exp(-time/500.0)) * (sin(2.0*pi*freq*time/1000.0 + phase) + 1.0)/2.0
           else:
             0.0 : min=0.0
@@ -143,7 +143,7 @@ StriatalNeuron = RateNeuron(
                 s 
                 
     tau*dmp/dt + mp = g_exc + g_mod - g_inh + g_dopa * K_dopa + delta_up * s + baseline + noise
-    rate = pos(mp) : max = 1.1
+    r = pos(mp) : max = 1.1
     """
 )
 
@@ -177,6 +177,6 @@ DopamineNeuron = RateNeuron(
                     
     tau*dmp/dt + mp = g_exc * (1.0 - mean_mod) - dip + baseline + noise
     
-    rate = pos(mp) : max = 1.2
+    r = pos(mp) : max = 1.2
     """
 )

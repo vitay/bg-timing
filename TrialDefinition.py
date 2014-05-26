@@ -1,7 +1,7 @@
 #############################
 # Trial definition
 #############################
-from ANNarchy4 import *
+from ANNarchy import *
 
 # Sensitization trial
 def sensitization_trial(trial_setup):

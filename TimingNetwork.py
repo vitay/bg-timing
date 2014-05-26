@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # Implementation in ANNarchy4 of the timing model presented in the Frontiers article
  
-from ANNarchy4 import *
-setup(dt = 1.0, suppress_warnings=True, show_time=False, verbose=False)
+from ANNarchy import *
+setup(dt = 1.0, num_threads=2, suppress_warnings=True, show_time=False, verbose=False)
 
 # Import neuron and synapse definitions
 from NeuronDefinition import *
@@ -67,12 +67,12 @@ VP.baseline = 0.5
 
 # Rostromedial tegmental nucleus
 RMTg = Population(name='RMTg', geometry=1, neuron=LeakyNeuron)
-RMTg.description['variables'][2]['bounds']['max'] = 1.1
+RMTg.set_variable_flags('r', {'max' : 1.1})
 
 # Lateral Habenula
 LHb = Population(name='LHb', geometry=1, neuron=LeakyNeuron)
 LHb.baseline = 1.0
-LHb.description['variables'][2]['bounds']['max'] = 1.1
+LHb.set_variable_flags('r', {'max' : 1.1})
 
 
 #############################
@@ -203,7 +203,8 @@ vmPFC_NAcc.K_alpha = 10.0
 vmPFC_NAcc.K_LTD = 10.0
 vmPFC_NAcc.dopa_threshold_LTP = 0.3
 vmPFC_NAcc.dopa_K_LTP = 5.0
-vmPFC_NAcc.description['variables'][3]['bounds']['min'] = -0.2 # TODO!!!
+vmPFC_NAcc.set_variable_flags('w', {'min': -0.2})
+
 
 # Projections within the ventral BG
 
@@ -228,7 +229,7 @@ NAcc_VP = Projection(
 NAcc_VP.eta = 100.0
 NAcc_VP.threshold_pre = 0.0
 NAcc_VP.threshold_post = 0.5
-NAcc_VP.description['variables'][0]['bounds']['max'] = 2.0
+NAcc_VP.set_variable_flags('w', {'max': 2.0})
 
 VP_RMTg = Projection(
     pre = VP,
@@ -263,6 +264,8 @@ if __name__ == '__main__':
     compile()
     
     from TrialDefinition import *
+    from time import time
+    tstart = time()
     
     print 'Start sensitization'
     # Perform 10 sensitization trials per US
@@ -287,4 +290,4 @@ if __name__ == '__main__':
     for trial in range(10):
         conditioning_trial(trial_setup)
         
-    print 'Finished'
+    print 'Finished in ', time() - tstart

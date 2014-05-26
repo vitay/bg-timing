@@ -1,4 +1,4 @@
-from ANNarchy4 import *
+from ANNarchy import *
 
 ############################
 # Definition of the synapses
@@ -12,9 +12,9 @@ Covariance = RateSynapse(
     tau_alpha = 10.0 : postsynaptic
     """,
     equations = """
-    tau_alpha * dalpha/dt + alpha = pos(post.rate - 1.0) : postsynaptic
-    eta * dvalue/dt = if (pre.rate > mean(pre.rate) | post.rate > mean(post.rate) ) : 
-                          (pre.rate - mean(pre.rate) ) * (post.rate - mean(post.rate)) - alpha * (post.rate - mean(post.rate))^2 * value 
+    tau_alpha * dalpha/dt + alpha = pos(post.r - 1.0) : postsynaptic
+    eta * dw/dt = if (pre.r > mean(pre.r) | post.r > mean(post.r) ) : 
+                          (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) - alpha * (post.r - mean(post.r))^2 * w 
                       else :
                             0.0 : min=0.0
     """
@@ -32,17 +32,17 @@ DACovariance = RateSynapse(
     dopa_K_LTP = 10.0 : postsynaptic
     """,
     equations = """
-    tau_alpha * dalpha/dt + alpha = pos(post.rate - 1.0)  : postsynaptic
+    tau_alpha * dalpha/dt + alpha = pos(post.r - 1.0)  : postsynaptic
     tau_dopa *ddopa_mean/dt + dopa_mean = post.g_dopa  : postsynaptic
     dopa = if post.g_dopa > dopa_threshold_LTP :
                dopa_K_LTP * pos( post.g_dopa - dopa_mean )
            else :
                 0.0
-    eta * dvalue/dt = if (pre.rate > mean(pre.rate)) & ( post.rate > mean(post.rate) ) : 
-                         dopa * (pre.rate - mean(pre.rate) ) * (post.rate - mean(post.rate)) - K_alpha * alpha * (post.rate - mean(post.rate))^2 * value
+    eta * dw/dt = if (pre.r > mean(pre.r)) & ( post.r > mean(post.r) ) : 
+                         dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) - K_alpha * alpha * (post.r - mean(post.r))^2 * w
                       else :
-                        if (pre.rate > mean(pre.rate) ) |( post.rate > mean(post.rate) ) : 
-                          K_LTD * dopa * (pre.rate - mean(pre.rate) ) * (post.rate - mean(post.rate)) 
+                        if (pre.r > mean(pre.r) ) |( post.r > mean(post.r) ) : 
+                          K_LTD * dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) 
                         else:
                           0.0  :  min=0.0
     """
@@ -62,11 +62,11 @@ DAShuntingCovariance = RateSynapse(
                dopa_K_LTP
            else : 
                0.0
-    eta * dvalue/dt = if (pre.rate > mean(pre.rate)) & (post.rate > mean(post.rate) ) : 
-                          dopa * (pre.rate - mean(pre.rate) ) * (post.rate - mean(post.rate)) * pos(post.g_exc - post.g_mod) 
+    eta * dw/dt = if (pre.r > mean(pre.r)) & (post.r > mean(post.r) ) : 
+                          dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) * pos(post.g_exc - post.g_mod) 
                       else : 
-                          if (pre.rate > mean(pre.rate)) | (post.rate > mean(post.rate) ) : 
-                              K_LTD * dopa * (pre.rate - mean(pre.rate) ) * (post.rate - mean(post.rate)) 
+                          if (pre.r > mean(pre.r)) | (post.r > mean(post.r) ) : 
+                              K_LTD * dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) 
                           else: 
                              0.0 : min=0.0
     """
@@ -78,8 +78,8 @@ AntiHebb = RateSynapse(
     eta = 100.0 : postsynaptic
     """,
     equations = """
-    eta * dvalue/dt = if (pre.rate > mean(pre.rate)) & (post.rate > mean(post.rate) ) : 
-                          (pre.rate - mean(pre.rate) ) * (post.rate - mean(post.rate))
+    eta * dw/dt = if (pre.r > mean(pre.r)) & (post.r > mean(post.r) ) : 
+                          (pre.r - mean(pre.r) ) * (post.r - mean(post.r))
                       else : 
                           0.0 : min=0.0, max=3.0
     """
@@ -93,6 +93,6 @@ Hebb = RateSynapse(
     threshold_post = 0.0 : postsynaptic
     """,
     equations = """
-    eta * dvalue/dt = positive(pre.rate - threshold_pre) * positive(post.rate - threshold_post) : min=0.0, max=20.0
+    eta * dw/dt = positive(pre.r - threshold_pre) * positive(post.r - threshold_post) : min=0.0, max=20.0
     """
 )

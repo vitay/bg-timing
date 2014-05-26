@@ -13,7 +13,7 @@ pop = VTA
 area = pop.name
 
 # Record result of learning
-recorded_areas = [{'pop': pop, 'var': 'rate', 'as_1D': True},
+recorded_areas = {pop: 'r'},
                   ]
 
 print 'Starting sensitization...'
@@ -42,38 +42,38 @@ conditioning_setup = [
 ]
 
 # Record trial 1
-record(recorded_areas)
+start_record(recorded_areas)
 conditioning_trial(conditioning_setup)
 recordings = get_record(recorded_areas)
-before_area = recordings[area]['rate']['data']
+before_area = recordings[area]['r']['data']
 
 # Perform 4 conditioning trials per association
 for trial in range(4):
     conditioning_trial(conditioning_setup)
 
 # Record trial 5
-record(recorded_areas)
+start_record(recorded_areas)
 conditioning_trial(conditioning_setup)
 recordings = get_record(recorded_areas)
-during_area = recordings[area]['rate']['data']
+during_area = recordings[area]['r']['data']
 
 # Perform 4 conditioning trials per association
 for trial in range(4):
     conditioning_trial(conditioning_setup)
 
 # Record trial 10
-record(recorded_areas)
+start_record(recorded_areas)
 conditioning_trial(conditioning_setup)
 recordings = get_record(recorded_areas)
-after_area = recordings[area]['rate']['data']
+after_area = recordings[area]['r']['data']
 
 print 'Starting reward omission...'
 
 # Record one omission trial
-record(recorded_areas)
+start_record(recorded_areas)
 omission_trial(conditioning_setup)
 recordings = get_record(recorded_areas)
-omit_area = recordings[area]['rate']['data']
+omit_area = recordings[area]['r']['data']
 
 print 'Analysing results...'
 
