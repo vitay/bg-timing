@@ -2,7 +2,8 @@
 # Implementation in ANNarchy4 of the timing model presented in the Frontiers article
  
 from ANNarchy import *
-setup(dt = 1.0, num_threads=2, suppress_warnings=True, show_time=False, verbose=False)
+
+setup(dt = 1.0, num_threads=2)
 
 # Import neuron and synapse definitions
 from NeuronDefinition import *
@@ -270,22 +271,23 @@ if __name__ == '__main__':
     print 'Start sensitization'
     # Perform 10 sensitization trials per US
     trial_setup = [
-        {'GUS': np.array([1., 1., 0., 0.]), 'duration': 500},
-        {'GUS': np.array([1., 0., 1., 0.]), 'duration': 500},
-        {'GUS': np.array([0., 0., 1., 1.]), 'duration': 500}
+        {'GUS': np.array([1., 1., 0., 0.]), 'duration': 500.0},
+        {'GUS': np.array([1., 0., 1., 0.]), 'duration': 500.0},
+        {'GUS': np.array([0., 0., 1., 1.]), 'duration': 500.0}
     ]
     for trial in range(10):
         sensitization_trial(trial_setup)
-    
+
+
     # Stop learning in the LH->BLA pathway
-    LH_BLA.eta = 1000000.0  
+    LH_BLA.disable_learning() 
     
     print 'Start conditioning'
     # Perform 10 conditioning trials per association
     trial_setup = [
-        {'GUS': np.array([1., 1., 0., 0.]), 'VIS': np.array([1., 0., 0.]), 'magnitude': 0.8, 'duration': 2000},
-        {'GUS': np.array([1., 0., 1., 0.]), 'VIS': np.array([0., 1., 0.]), 'magnitude': 0.5, 'duration': 3000},
-        {'GUS': np.array([0., 0., 1., 1.]), 'VIS': np.array([0., 0., 1.]), 'magnitude': 1.0, 'duration': 4000}
+        {'GUS': np.array([1., 1., 0., 0.]), 'VIS': np.array([1., 0., 0.]), 'magnitude': 0.8, 'duration': 2000.0},
+        {'GUS': np.array([1., 0., 1., 0.]), 'VIS': np.array([0., 1., 0.]), 'magnitude': 0.5, 'duration': 3000.0},
+        {'GUS': np.array([0., 0., 1., 1.]), 'VIS': np.array([0., 0., 1.]), 'magnitude': 1.0, 'duration': 4000.0}
     ]
     for trial in range(10):
         conditioning_trial(trial_setup)

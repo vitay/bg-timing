@@ -12,7 +12,7 @@ LeakyNeuron = RateNeuron(
     """,
     equations = """
     noise = Uniform(-0.1, 0.1)
-    tau*dmp/dt + mp = sum(exc) - sum(inh) + baseline + noise
+    tau * dmp/dt + mp = sum(exc) - sum(inh) + baseline + noise
     r = pos(mp) : max=2.0
     """
 )
@@ -59,12 +59,16 @@ ShuntingPhasicNeuron = RateNeuron(
     g_mod = sum(mod) 
     g_dopa = sum(dopa) 
     noise = Uniform(-0.1, 0.1)
+
+    has_exc = if g_exc > 0.1 : 0.0 else: 1.0
+
     tau_adaptation * dadapted_exc/dt + adapted_exc =  g_exc 
     tau_adaptation * dadapted_mod/dt + adapted_mod =  g_mod 
-    has_exc = if g_exc > 0.1 : 0.0 else: 1.0
+
     tau*dmp/dt + mp =   pos(sum(exc) - K_adaptation * adapted_exc)
         + pos(g_mod - K_adaptation * adapted_mod) * has_exc 
         - sum(inh) + noise
+    
     r = pos(mp)
     """
 )
@@ -91,6 +95,7 @@ OscillatorNeuron = RateNeuron(
                 time + 1 
            else:
                 0  : int, init=0 
+
     r = if oscillating > 0 : 
             (1.0 - exp(-time/500.0)) * (sin(2.0*pi*freq*time/1000.0 + phase) + 1.0)/2.0
           else:
@@ -143,6 +148,7 @@ StriatalNeuron = RateNeuron(
                 s 
                 
     tau*dmp/dt + mp = g_exc + g_mod - g_inh + g_dopa * K_dopa + delta_up * s + baseline + noise
+
     r = pos(mp) : max = 1.1
     """
 )
@@ -161,9 +167,6 @@ DopamineNeuron = RateNeuron(
     g_mod = sum(mod)
     g_inh = sum(inh)
     noise = Uniform(-0.1, 0.1)
-        
-    tau_decrease * dmean_exc/dt + mean_exc  = g_exc
-    tau_decrease * dmean_inh/dt + mean_inh  = g_inh
     
     dip = if mean_exc < 0.1 :
             positive(g_inh - mean_inh)
@@ -176,6 +179,9 @@ DopamineNeuron = RateNeuron(
                     mean_mod + dt/tau_modulation * (g_mod - mean_mod)
                     
     tau*dmp/dt + mp = g_exc * (1.0 - mean_mod) - dip + baseline + noise
+        
+    tau_decrease * dmean_exc/dt + mean_exc  = g_exc
+    tau_decrease * dmean_inh/dt + mean_inh  = g_inh
     
     r = pos(mp) : max = 1.2
     """

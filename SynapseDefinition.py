@@ -32,16 +32,19 @@ DACovariance = RateSynapse(
     dopa_K_LTP = 10.0 : postsynaptic
     """,
     equations = """
-    tau_alpha * dalpha/dt + alpha = pos(post.r - 1.0)  : postsynaptic
-    tau_dopa *ddopa_mean/dt + dopa_mean = post.g_dopa  : postsynaptic
+
     dopa = if post.g_dopa > dopa_threshold_LTP :
                dopa_K_LTP * pos( post.g_dopa - dopa_mean )
            else :
-                0.0
+                0.0 : postsynaptic
+
+    tau_alpha * dalpha/dt + alpha = pos(post.r - 1.0)  : postsynaptic
+    tau_dopa *ddopa_mean/dt + dopa_mean = post.g_dopa  : postsynaptic
+
     eta * dw/dt = if (pre.r > mean(pre.r)) & ( post.r > mean(post.r) ) : 
                          dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) - K_alpha * alpha * (post.r - mean(post.r))^2 * w
                       else :
-                        if (pre.r > mean(pre.r) ) |( post.r > mean(post.r) ) : 
+                        if (pre.r > mean(pre.r) ) | ( post.r > mean(post.r) ) : 
                           K_LTD * dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) 
                         else:
                           0.0  :  min=0.0
@@ -62,6 +65,7 @@ DAShuntingCovariance = RateSynapse(
                dopa_K_LTP
            else : 
                0.0
+
     eta * dw/dt = if (pre.r > mean(pre.r)) & (post.r > mean(post.r) ) : 
                           dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) * pos(post.g_exc - post.g_mod) 
                       else : 
