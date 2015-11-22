@@ -2,7 +2,7 @@
 
 Code for the model described in:
 
-Vitay, J. and Hamker, F. (2014). Timing and expectation of reward: a neuro-computational model of the afferents to the ventral tegmental area. *Frontiers in Neurorobotics* 8(4), [doi:10.3389/fnbot.2014.00004](doi:10.3389/fnbot.2014.00004)  
+Vitay, J. and Hamker, F. (2014). Timing and expectation of reward: a neuro-computational model of the afferents to the ventral tegmental area. *Frontiers in Neurorobotics* 8(4), [doi:10.3389/fnbot.2014.00004](http://dx.doi.org/10.3389/fnbot.2014.00004)  
 
 ## Run the code
 
