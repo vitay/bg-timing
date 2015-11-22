@@ -5,20 +5,21 @@ from ANNarchy import *
 ############################
 
 # Basic leaky neuron
-LeakyNeuron = RateNeuron(
+LeakyNeuron = Neuron(
     parameters = """
     tau = 10.0 : population
     baseline = 0.0
+    rmax = 2.0 : population
     """,
     equations = """
     noise = Uniform(-0.1, 0.1)
     tau * dmp/dt + mp = sum(exc) - sum(inh) + baseline + noise
-    r = pos(mp) : max=2.0
+    r = pos(mp) : max=rmax
     """
 )
 
 # Neuron with temporal adaptation of excitatory inputs
-PhasicNeuron = RateNeuron(
+PhasicNeuron = Neuron(
     parameters = """
     tau = 10.0 : population
     tau_adaptation = 500.0 : population
@@ -34,7 +35,7 @@ PhasicNeuron = RateNeuron(
 )
 
 # Neuron with shunting of inhibitory inputs
-ShuntingNeuron = RateNeuron(
+ShuntingNeuron = Neuron(
     parameters = """
     tau = 10.0 : population
     baseline = 0.5 : population
@@ -48,7 +49,7 @@ ShuntingNeuron = RateNeuron(
 )
 
 # Neuron with temporal adaptation and shunting of excitatory inputs
-ShuntingPhasicNeuron = RateNeuron(
+ShuntingPhasicNeuron = Neuron(
     parameters = """
     tau = 10.0 : population
     tau_adaptation = 500.0 : population
@@ -74,7 +75,7 @@ ShuntingPhasicNeuron = RateNeuron(
 )
 
 # Oscillator neuron
-OscillatorNeuron = RateNeuron(
+OscillatorNeuron = Neuron(
     parameters = """
     tau = 1.0 : population
     freq = 1.0
@@ -104,7 +105,7 @@ OscillatorNeuron = RateNeuron(
 )
 
 # Striatal Neuron
-StriatalNeuron = RateNeuron(
+StriatalNeuron = Neuron(
     parameters = """
     tau = 10.0 : population
     baseline = -0.9 : population
@@ -155,7 +156,7 @@ StriatalNeuron = RateNeuron(
 
 
 # Dopamine Neuron
-DopamineNeuron = RateNeuron(
+DopamineNeuron = Neuron(
     parameters = """
     tau = 30.0 : population
     tau_decrease = 30.0 : population

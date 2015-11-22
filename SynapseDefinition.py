@@ -6,7 +6,7 @@ from ANNarchy import *
 
 
 # Covariance learning rule with homeostatic regularization (dynamic Oja)
-Covariance = RateSynapse(
+Covariance = Synapse(
     parameters = """
     eta = 100.0 : postsynaptic
     tau_alpha = 10.0 : postsynaptic
@@ -21,7 +21,7 @@ Covariance = RateSynapse(
 )
 
 # Covariance learning rule modulated by dopamine
-DACovariance = RateSynapse(
+DACovariance = Synapse(
     parameters = """
     eta = 100.0 : postsynaptic
     tau_alpha = 1.0 : postsynaptic
@@ -30,6 +30,7 @@ DACovariance = RateSynapse(
     K_LTD = 1.0 : postsynaptic
     dopa_threshold_LTP = 0.3 : postsynaptic
     dopa_K_LTP = 10.0 : postsynaptic
+    wmin = 0.0 : postsynaptic
     """,
     equations = """
 
@@ -47,12 +48,12 @@ DACovariance = RateSynapse(
                         if (pre.r > mean(pre.r) ) | ( post.r > mean(post.r) ) : 
                           K_LTD * dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) 
                         else:
-                          0.0  :  min=0.0
+                          0.0  :  min=wmin
     """
 )
 
 # Covariance learning rule modulated by dopamine with shunting excitation
-DAShuntingCovariance = RateSynapse(
+DAShuntingCovariance = Synapse(
     parameters = """
     eta = 2000.0 : postsynaptic
     tau_dopa = 300.0 : postsynaptic
@@ -77,7 +78,7 @@ DAShuntingCovariance = RateSynapse(
 )
 
 # Anti-hebbian learning rule
-AntiHebb = RateSynapse(
+AntiHebb = Synapse(
     parameters = """
     eta = 100.0 : postsynaptic
     """,
@@ -90,13 +91,15 @@ AntiHebb = RateSynapse(
 )
 
 # Hebbian learning rule
-Hebb = RateSynapse(
+Hebb = Synapse(
     parameters = """
     eta = 500.0 : postsynaptic
     threshold_pre = 0.0 : postsynaptic
     threshold_post = 0.0 : postsynaptic
+    wmin = 0.0  : postsynaptic
+    wmax = 20.0 : postsynaptic
     """,
     equations = """
-    eta * dw/dt = positive(pre.r - threshold_pre) * positive(post.r - threshold_post) : min=0.0, max=20.0
+    eta * dw/dt = positive(pre.r - threshold_pre) * positive(post.r - threshold_post) : min=wmin, max=wmax
     """
 )

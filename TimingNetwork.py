@@ -68,12 +68,12 @@ VP.baseline = 0.5
 
 # Rostromedial tegmental nucleus
 RMTg = Population(name='RMTg', geometry=1, neuron=LeakyNeuron)
-RMTg.set_variable_flags('r', {'max' : 1.1})
+RMTg.rmax = 1.1
 
 # Lateral Habenula
 LHb = Population(name='LHb', geometry=1, neuron=LeakyNeuron)
 LHb.baseline = 1.0
-LHb.set_variable_flags('r', {'max' : 1.1})
+LHb.rmax = 1.1
 
 
 #############################
@@ -204,7 +204,7 @@ vmPFC_NAcc.K_alpha = 10.0
 vmPFC_NAcc.K_LTD = 10.0
 vmPFC_NAcc.dopa_threshold_LTP = 0.3
 vmPFC_NAcc.dopa_K_LTP = 5.0
-vmPFC_NAcc.set_variable_flags('w', {'min': -0.2})
+vmPFC_NAcc.wmin = -0.2
 
 
 # Projections within the ventral BG
@@ -230,7 +230,7 @@ NAcc_VP = Projection(
 NAcc_VP.eta = 100.0
 NAcc_VP.threshold_pre = 0.0
 NAcc_VP.threshold_post = 0.5
-NAcc_VP.set_variable_flags('w', {'max': 2.0})
+NAcc_VP.wmax = 2.0
 
 VP_RMTg = Projection(
     pre = VP,
@@ -268,7 +268,7 @@ if __name__ == '__main__':
     from time import time
     tstart = time()
     
-    print 'Start sensitization'
+    print('Start sensitization')
     # Perform 10 sensitization trials per US
     trial_setup = [
         {'GUS': np.array([1., 1., 0., 0.]), 'duration': 500.0},
@@ -282,7 +282,7 @@ if __name__ == '__main__':
     # Stop learning in the LH->BLA pathway
     LH_BLA.disable_learning() 
     
-    print 'Start conditioning'
+    print('Start conditioning')
     # Perform 10 conditioning trials per association
     trial_setup = [
         {'GUS': np.array([1., 1., 0., 0.]), 'VIS': np.array([1., 0., 0.]), 'magnitude': 0.8, 'duration': 2000.0},
@@ -292,4 +292,4 @@ if __name__ == '__main__':
     for trial in range(10):
         conditioning_trial(trial_setup)
         
-    print 'Finished in ', time() - tstart
+    print('Finished in ', time() - tstart)

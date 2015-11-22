@@ -9,18 +9,29 @@ from TrialDefinition import *
 compile()
 
 # Before running the simulation, we have to define the populations which will be recorded:
+monitors = {
+    VTA: Monitor(VTA, 'r', start=False),
+    BLA: Monitor(BLA, 'r', start=False),
+    CE: Monitor(CE, 'r', start=False),
+    NAcc: Monitor(NAcc, ['r', 'mp', 'g_mod', 's'], start=False),
+    PPTN_US: Monitor(PPTN_US, 'r', start=False),
+    PPTN_CS: Monitor(PPTN_CS, 'r', start=False),
+    VP: Monitor(VP, 'r', start=False),
+    LHb: Monitor(LHb, 'r', start=False),
+    RMTg: Monitor(RMTg, 'r', start=False),
+    LH: Monitor(LH, 'r', start=False),
+    VIS: Monitor(VIS, 'r', start=False) 
+}
 
-recorded_areas = {VTA: 'r',
-                  BLA: 'r',
-                  CE: 'r',
-                  NAcc: ['r', 'mp', 'g_mod', 's'],
-                  PPTN_US: 'r',
-                  PPTN_CS: 'r',
-                  VP: 'r',
-                  LHb: 'r',
-                  RMTg: 'r',
-                  LH: 'r',
-                  VIS: 'r' }
+def start_record(monitors):
+    for monitor in monitors.values():
+        monitor.start()
+
+def get_record(monitors):
+    data = {}
+    for name, monitor in monitors.items():
+        data[name] = monitor.get()
+    return data
 
 # 1.2 Sensitization phase
 # In this first phase, we present the three US alone to build the LH -> BLA connections. Learning in this pathway is disabled at the end.
@@ -33,7 +44,7 @@ sensitization_setup = [
 ]
 
 # Perform 10 sensitization trials per US
-print 'Sensitization phase'
+print('Sensitization phase')
 for trial in range(10):
     sensitization_trial(sensitization_setup)
 
@@ -50,28 +61,28 @@ conditioning_setup = [
     {'GUS': np.array([0., 0., 1., 1.]), 'VIS': np.array([0., 0., 1.]), 'magnitude': 1.0, 'duration': 4000.0}
 ]
 
-print 'Conditioning phase'
+print('Conditioning phase')
 recordings = []
 for trial in range(10):
-    start_record(recorded_areas) # Tell the network which population to record
+    start_record(monitors) # Tell the network which population to record
     conditioning_trial(conditioning_setup) # Perform one conditioning trial
-    recordings.append(get_record(recorded_areas)) # Save the recordings
+    recordings.append(get_record(monitors)) # Save the recordings
 
 # 1.4 Omission trials
 # Once conditioning is complete, we omit reward to observe the response of DA cells:
 
-print 'Omission trial'
-start_record(recorded_areas)
+print('Omission trial')
+start_record(monitors)
 omission_trial(conditioning_setup)
-recordings.append(get_record(recorded_areas))
+recordings.append(get_record(monitors))
 
 # 1.5 Early trials
 # Last, we deliver reward 1s earlier than expected:
 
-print 'Earlier trial'
-start_record(recorded_areas)
+print('Earlier trial')
+start_record(monitors)
 earlier_trial(conditioning_setup)
-recordings.append(get_record(recorded_areas))
+recordings.append(get_record(monitors))
 
 # 2. Results
 
@@ -80,8 +91,8 @@ import pylab as plt
 # 2.1 Conditioning in the amygdala (Fig. 4)
 # We extract the maximal firing rate in BLA during the first and last conditioning trials for the three stimuli.
 
-BLA_trial1 = np.max(recordings[0][BLA]['r']['data'], axis=0)
-BLA_trial10 = np.max(recordings[9][BLA]['r']['data'], axis=0)
+BLA_trial1 = np.max(recordings[0][BLA]['r'], axis=1)
+BLA_trial10 = np.max(recordings[9][BLA]['r'], axis=1)
 
 
 plt.figure(figsize=(10,6))
@@ -115,14 +126,13 @@ ax.set_xlabel('Time (ms)')
 ax.set_ylim([0.0, 1.2])
 plt.show()
 
-
 # 2.2 Timecourse of the activity of the VTA cell during conditioning (Fig. 5)
 
-VTA_trial1 = recordings[0][VTA]['r']['data'][0]
-VTA_trial5 = recordings[4][VTA]['r']['data'][0]
-VTA_trial10 = recordings[9][VTA]['r']['data'][0]
-VTA_omit = recordings[10][VTA]['r']['data'][0]
-VTA_sooner = recordings[11][VTA]['r']['data'][0]
+VTA_trial1 = recordings[0][VTA]['r'][:, 0]
+VTA_trial5 = recordings[4][VTA]['r'][:, 0]
+VTA_trial10 = recordings[9][VTA]['r'][:, 0]
+VTA_omit = recordings[10][VTA]['r'][:, 0]
+VTA_sooner = recordings[11][VTA]['r'][:, 0]
 
 plt.figure(figsize=(12,10))
 # Trial 1
@@ -201,12 +211,12 @@ US3 = slice(15900, 16100)
 
 VTA_CS1 = []; VTA_CS2 = []; VTA_CS3 = []; VTA_US1 = []; VTA_US2 = []; VTA_US3 = []
 for trial in range(10):
-    VTA_CS1.append(np.max( recordings[trial][VTA]['r']['data'][0][CS1]))
-    VTA_CS2.append(np.max( recordings[trial][VTA]['r']['data'][0][CS2]))
-    VTA_CS3.append(np.max( recordings[trial][VTA]['r']['data'][0][CS3]))
-    VTA_US1.append(np.max( recordings[trial][VTA]['r']['data'][0][US1]))
-    VTA_US2.append(np.max( recordings[trial][VTA]['r']['data'][0][US2]))
-    VTA_US3.append(np.max( recordings[trial][VTA]['r']['data'][0][US3]))
+    VTA_CS1.append(np.max( recordings[trial][VTA]['r'][CS1, 0]))
+    VTA_CS2.append(np.max( recordings[trial][VTA]['r'][CS2, 0]))
+    VTA_CS3.append(np.max( recordings[trial][VTA]['r'][CS3, 0]))
+    VTA_US1.append(np.max( recordings[trial][VTA]['r'][US1, 0]))
+    VTA_US2.append(np.max( recordings[trial][VTA]['r'][US2, 0]))
+    VTA_US3.append(np.max( recordings[trial][VTA]['r'][US3, 0]))
 
 plt.figure(figsize=(12,4))
 # CS1 - US1 
@@ -237,15 +247,15 @@ plt.show()
 # 2.4 Timecourse of the internal variables of a single NAcc neuron during a reward omission trial (Fig. 8)
 # For this figure, we record different internal variables of the cell in NAcc maximally responding to the CS1-US1 interval in the reward omission condition. 
 
-NAcc_rates = recordings[10][NAcc]['r']['data']
+NAcc_rates = recordings[10][NAcc]['r']
 active_cell = 0; max_rate = 0.0
 for cell in range(NAcc.size):
-    if np.max(NAcc_rates[cell][:5000]) > max_rate:
-        max_rate = np.max(NAcc_rates[cell][:5000])
+    if np.max(NAcc_rates[:5000, cell]) > max_rate:
+        max_rate = np.max(NAcc_rates[:5000, cell])
         active_cell = cell
-NAcc_mp = recordings[10][NAcc]['mp']['data'][active_cell][:5000]
-NAcc_s = recordings[10][NAcc]['s']['data'][active_cell][:5000]*0.5 - 0.8
-NAcc_vmpfc = recordings[10][NAcc]['g_mod']['data'][active_cell][:5000]
+NAcc_mp = recordings[10][NAcc]['mp'][:5000, active_cell]
+NAcc_s = recordings[10][NAcc]['s'][:5000, active_cell]*0.5 - 0.8
+NAcc_vmpfc = recordings[10][NAcc]['g_mod'][:5000, active_cell]
 
 plt.figure(figsize=(10,8))
 plt.plot(NAcc_mp, label='membrane potential')
@@ -262,66 +272,66 @@ plt.show()
 plt.figure(figsize=(16,16))
 # Conditioning trial
 ax = plt.subplot2grid((8,2),(0, 0))
-ax.plot(recordings[9][VIS]['r']['data'][0][:5000]) # TODO: inputs
+ax.plot(recordings[9][VIS]['r'][:5000, 0]) # TODO: inputs
 ax.set_title('Conditioning trial')
 ax.set_ylabel('Inputs')
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(1, 0))
-ax.plot(recordings[9][VTA]['r']['data'][0][:5000])
+ax.plot(recordings[9][VTA]['r'][:5000, 0])
 ax.set_ylabel('VTA')
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(2, 0))
-ax.plot(recordings[9][CE]['r']['data'][0][:5000])
+ax.plot(recordings[9][CE]['r'][:5000, 0])
 ax.set_ylabel('CE')
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(3, 0))
-ax.plot(recordings[9][PPTN_US]['r']['data'][0][:5000])
-ax.plot(recordings[9][PPTN_CS]['r']['data'][0][:5000])
+ax.plot(recordings[9][PPTN_US]['r'][:5000, 0])
+ax.plot(recordings[9][PPTN_CS]['r'][:5000, 0])
 ax.set_ylabel('PPTN')
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(4, 0))
-ax.plot(recordings[9][NAcc]['r']['data'][active_cell][:5000])
+ax.plot(recordings[9][NAcc]['r'][:5000, active_cell])
 ax.set_ylabel('NAcc')
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(5, 0))
-ax.plot(recordings[9][VP]['r']['data'][0][:5000])
+ax.plot(recordings[9][VP]['r'][:5000, 0])
 ax.set_ylabel('VP')
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(6, 0))
-ax.plot(recordings[9][LHb]['r']['data'][0][:5000])
+ax.plot(recordings[9][LHb]['r'][:5000, 0])
 ax.set_ylabel('LHb')
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(7, 0))
-ax.plot(recordings[9][RMTg]['r']['data'][0][:5000])
+ax.plot(recordings[9][RMTg]['r'][:5000, 0])
 ax.set_ylabel('RMTg')
 ax.set_ylim([0.0, 1.2])
 ax.set_xlabel('Time (ms)')
 # Omission trial
 ax = plt.subplot2grid((8,2),(0, 1))
-ax.plot(recordings[10][VIS]['r']['data'][0][:5000]) # TODO: inputs
+ax.plot(recordings[10][VIS]['r'][:5000, 0]) # TODO: inputs
 ax.set_title('Omission trial')
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(1, 1))
-ax.plot(recordings[10][VTA]['r']['data'][0][:5000])
+ax.plot(recordings[10][VTA]['r'][:5000, 0])
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(2, 1))
-ax.plot(recordings[10][CE]['r']['data'][0][:5000])
+ax.plot(recordings[10][CE]['r'][:5000, 0])
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(3, 1))
-ax.plot(recordings[10][PPTN_US]['r']['data'][0][:5000])
-ax.plot(recordings[10][PPTN_CS]['r']['data'][0][:5000])
+ax.plot(recordings[10][PPTN_US]['r'][:5000, 0])
+ax.plot(recordings[10][PPTN_CS]['r'][:5000, 0])
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(4, 1))
-ax.plot(recordings[10][NAcc]['r']['data'][active_cell][:5000])
+ax.plot(recordings[10][NAcc]['r'][:5000, active_cell])
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(5, 1))
-ax.plot(recordings[10][VP]['r']['data'][0][:5000])
+ax.plot(recordings[10][VP]['r'][:5000, 0])
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(6, 1))
-ax.plot(recordings[10][LHb]['r']['data'][0][:5000])
+ax.plot(recordings[10][LHb]['r'][:5000, 0])
 ax.set_ylim([0.0, 1.2])
 ax = plt.subplot2grid((8,2),(7, 1))
-ax.plot(recordings[10][RMTg]['r']['data'][0][:5000])
+ax.plot(recordings[10][RMTg]['r'][:5000, 0])
 ax.set_ylim([0.0, 1.2])
 ax.set_xlabel('Time (ms)')
 
