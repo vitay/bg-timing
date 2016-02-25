@@ -179,7 +179,7 @@ DopamineNeuron = Neuron(
                  else:
                     mean_mod + dt/tau_modulation * (g_mod - mean_mod)
                     
-    tau*dmp/dt + mp = g_exc * (1.0 - mean_mod) - dip + baseline + noise
+    tau*dmp/dt + mp = g_exc * pos(1.0 - mean_mod) - dip + baseline + noise
         
     tau_decrease * dmean_exc/dt + mean_exc  = g_exc
     tau_decrease * dmean_inh/dt + mean_inh  = g_inh
