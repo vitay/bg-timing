@@ -13,10 +13,9 @@ Covariance = Synapse(
     """,
     equations = """
     tau_alpha * dalpha/dt + alpha = pos(post.r - 1.0) : postsynaptic
-    eta * dw/dt = if (pre.r > mean(pre.r) | post.r > mean(post.r) ) : 
-                          (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) - alpha * (post.r - mean(post.r))^2 * w 
-                      else :
-                            0.0 : min=0.0
+    eta * dw/dt = ite(  pre.r > mean(pre.r) | post.r > mean(post.r),
+                        (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) - alpha * (post.r - mean(post.r))^2 * w,
+                        0.0) : min=0.0
     """
 )
 
@@ -34,21 +33,20 @@ DACovariance = Synapse(
     """,
     equations = """
 
-    dopa = if post.g_dopa > dopa_threshold_LTP :
-               dopa_K_LTP * pos( post.g_dopa - dopa_mean )
-           else :
-                0.0 : postsynaptic
+    dopa = ite (post.g_dopa > dopa_threshold_LTP,
+                dopa_K_LTP * pos( post.g_dopa - dopa_mean ),
+                0.0 ) : postsynaptic
 
     tau_alpha * dalpha/dt + alpha = pos(post.r - 1.0)  : postsynaptic
     tau_dopa *ddopa_mean/dt + dopa_mean = post.g_dopa  : postsynaptic
 
-    eta * dw/dt = if (pre.r > mean(pre.r)) & ( post.r > mean(post.r) ) : 
-                         dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) - K_alpha * alpha * (post.r - mean(post.r))^2 * w
-                      else :
-                        if (pre.r > mean(pre.r) ) | ( post.r > mean(post.r) ) : 
-                          K_LTD * dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) 
-                        else:
-                          0.0  :  min=wmin
+    eta * dw/dt = ite( (pre.r > mean(pre.r)) & ( post.r > mean(post.r) ),
+                       dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) - K_alpha * alpha * (post.r - mean(post.r))^2 * w,
+                       ite( (pre.r > mean(pre.r) ) | ( post.r > mean(post.r) ),
+                             K_LTD * dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)),
+                             0.0
+                        )
+                    )  :  min=wmin
     """
 )
 
@@ -62,18 +60,17 @@ DAShuntingCovariance = Synapse(
     dopa_K_LTP = 4.0 : postsynaptic
     """,
     equations = """
-    dopa = if post.g_dopa > dopa_threshold_LTP : 
-               dopa_K_LTP
-           else : 
-               0.0
+    dopa = ite (post.g_dopa > dopa_threshold_LTP, dopa_K_LTP, 0.0)
 
-    eta * dw/dt = if (pre.r > mean(pre.r)) & (post.r > mean(post.r) ) : 
-                          dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) * pos(post.g_exc - post.g_mod) 
-                      else : 
-                          if (pre.r > mean(pre.r)) | (post.r > mean(post.r) ) : 
-                              K_LTD * dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) 
-                          else: 
-                             0.0 : min=0.0
+    eta * dw/dt = ite(
+                    (pre.r > mean(pre.r)) & (post.r > mean(post.r) ),
+                    dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)) * pos(post.g_exc - post.g_mod),
+                    ite (
+                        (pre.r > mean(pre.r)) | (post.r > mean(post.r) ),
+                        K_LTD * dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)),
+                        0.0
+                        )
+                    ) : min=0.0
     """
 )
 
@@ -83,10 +80,11 @@ AntiHebb = Synapse(
     eta = 100.0 : postsynaptic
     """,
     equations = """
-    eta * dw/dt = if (pre.r > mean(pre.r)) & (post.r > mean(post.r) ) : 
-                          (pre.r - mean(pre.r) ) * (post.r - mean(post.r))
-                      else : 
-                          0.0 : min=0.0, max=3.0
+    eta * dw/dt = ite(
+                    (pre.r > mean(pre.r)) & (post.r > mean(post.r) ),
+                    (pre.r - mean(pre.r) ) * (post.r - mean(post.r)),
+                    0.0
+                    ) : min=0.0, max=3.0
     """
 )
 
