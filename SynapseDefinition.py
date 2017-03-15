@@ -8,8 +8,8 @@ from ANNarchy import *
 # Covariance learning rule with homeostatic regularization (dynamic Oja)
 Covariance = Synapse(
     parameters = """
-    eta = 100.0 : postsynaptic
-    tau_alpha = 10.0 : postsynaptic
+    eta = 100.0 : projection
+    tau_alpha = 10.0 : projection
     """,
     equations = """
     tau_alpha * dalpha/dt + alpha = pos(post.r - 1.0) : postsynaptic
@@ -22,14 +22,14 @@ Covariance = Synapse(
 # Covariance learning rule modulated by dopamine
 DACovariance = Synapse(
     parameters = """
-    eta = 100.0 : postsynaptic
-    tau_alpha = 1.0 : postsynaptic
-    tau_dopa = 300.0 : postsynaptic
-    K_alpha = 5.0 : postsynaptic
-    K_LTD = 1.0 : postsynaptic
-    dopa_threshold_LTP = 0.3 : postsynaptic
-    dopa_K_LTP = 10.0 : postsynaptic
-    wmin = 0.0 : postsynaptic
+    eta = 100.0 : projection
+    tau_alpha = 1.0 : projection
+    tau_dopa = 300.0 : projection
+    K_alpha = 5.0 : projection
+    K_LTD = 1.0 : projection
+    dopa_threshold_LTP = 0.3 : projection
+    dopa_K_LTP = 10.0 : projection
+    wmin = 0.0 : projection
     """,
     equations = """
 
@@ -53,11 +53,11 @@ DACovariance = Synapse(
 # Covariance learning rule modulated by dopamine with shunting excitation
 DAShuntingCovariance = Synapse(
     parameters = """
-    eta = 2000.0 : postsynaptic
-    tau_dopa = 300.0 : postsynaptic
-    K_LTD = 5.0 : postsynaptic
-    dopa_threshold_LTP = 0.3 : postsynaptic
-    dopa_K_LTP = 4.0 : postsynaptic
+    eta = 2000.0 : projection
+    tau_dopa = 300.0 : projection
+    K_LTD = 5.0 : projection
+    dopa_threshold_LTP = 0.3 : projection
+    dopa_K_LTP = 4.0 : projection
     """,
     equations = """
     dopa = ite (post.g_dopa > dopa_threshold_LTP, dopa_K_LTP, 0.0)
@@ -77,7 +77,7 @@ DAShuntingCovariance = Synapse(
 # Anti-hebbian learning rule
 AntiHebb = Synapse(
     parameters = """
-    eta = 100.0 : postsynaptic
+    eta = 100.0 : projection
     """,
     equations = """
     eta * dw/dt = ite(
@@ -91,11 +91,11 @@ AntiHebb = Synapse(
 # Hebbian learning rule
 Hebb = Synapse(
     parameters = """
-    eta = 500.0 : postsynaptic
-    threshold_pre = 0.0 : postsynaptic
-    threshold_post = 0.0 : postsynaptic
-    wmin = 0.0  : postsynaptic
-    wmax = 20.0 : postsynaptic
+    eta = 500.0 : projection
+    threshold_pre = 0.0 : projection
+    threshold_post = 0.0 : projection
+    wmin = 0.0  : projection
+    wmax = 20.0 : projection
     """,
     equations = """
     eta * dw/dt = positive(pre.r - threshold_pre) * positive(post.r - threshold_post) : min=wmin, max=wmax
