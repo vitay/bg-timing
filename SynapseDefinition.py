@@ -30,6 +30,7 @@ DACovariance = Synapse(
     dopa_threshold_LTP = 0.3 : projection
     dopa_K_LTP = 10.0 : projection
     wmin = 0.0 : projection
+    wmax = 10.0 : projection
     """,
     equations = """
 
@@ -46,7 +47,7 @@ DACovariance = Synapse(
                         K_LTD * dopa * (pre.r - mean(pre.r) ) * (post.r - mean(post.r)),
                         0.0
                 )
-            ) / eta :  min=wmin
+            ) / eta :  min=wmin, max = wmax
     """
 )
 
@@ -89,7 +90,7 @@ AntiHebb = Synapse(
 )
 
 # Hebbian learning rule
-Hebb = Synapse(
+Hebbian = Synapse(
     parameters = """
     eta = 500.0 : projection
     threshold_pre = 0.0 : projection

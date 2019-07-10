@@ -164,7 +164,7 @@ NAcc_VTA = Projection(
     pre = NAcc,
     post = VTA,
     target = 'mod',
-    synapse = Hebb
+    synapse = Hebbian
 ).connect_all_to_all(weights=0.0)
 
 
@@ -225,7 +225,7 @@ NAcc_VP = Projection(
     pre = NAcc,
     post = VP,
     target = 'inh',
-    synapse = Hebb
+    synapse = Hebbian
 ).connect_all_to_all(weights=0.0)
 NAcc_VP.eta = 100.0
 NAcc_VP.threshold_pre = 0.0
